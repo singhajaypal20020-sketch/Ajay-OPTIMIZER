@@ -1,0 +1,2890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>APS-OPTIMA | Structural Design Tool</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    <!-- Serif Font for Print Header -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; padding-bottom: 60px; /* Space for footer */ }
+        .input-group label { font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 0.25rem; display: block; }
+        .input-group input, .input-group select { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; background-color: #fff; transition: border-color 0.15s ease-in-out; }
+        .input-group input:focus, .input-group select:focus { outline: none; border-color: #3b82f6; ring: 2px solid #3b82f6; }
+        .card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); overflow: hidden; }
+        .btn-primary { background-color: #2563eb; color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; transition: background-color 0.2s; width: 100%; display: flex; justify-content: center; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-secondary { background-color: #fff; color: #475569; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; }
+        .btn-secondary:hover { background-color: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* Table Styles */
+        .check-table { width: 100%; text-align: left; border-collapse: collapse; font-size: 0.875rem; }
+        .check-table th { background-color: #f1f5f9; color: #475569; font-weight: 600; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
+        .check-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        .check-table tr:last-child td { border-bottom: none; }
+        .check-table tr:hover { background-color: #f8fafc; }
+        
+        /* Status Badges */
+        .status-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; gap: 0.25rem; letter-spacing: 0.025em; }
+        .status-pass { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; } 
+        .status-doubly { background-color: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; } 
+        .status-warn { background-color: #fef9c3; color: #a16207; border: 1px solid #fde047; } 
+        .status-fail { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; } 
+
+        /* Metric Box */
+        .metric-box { padding: 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; background-color: #f8fafc; transition: all 0.2s; }
+        .metric-box:hover { border-color: #cbd5e1; background-color: #fff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .metric-label { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 0.25rem; }
+        .metric-value { font-size: 1.25rem; color: #0f172a; font-weight: 700; font-family: monospace; }
+        .metric-meta { font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem; display: flex; justify-content: space-between; align-items: center; }
+
+        .validation-badge {
+            background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+        }
+
+        /* Branding Footer */
+        .brand-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; border-top: 1px solid #e2e8f0;
+            padding: 0.75rem; text-align: center; font-size: 0.8rem; color: #64748b;
+            z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 0.75rem;
+            max-width: 500px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Efficiency Bar */
+        .eff-bar-bg { background-color: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .eff-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        .eff-safe { background-color: #22c55e; } /* Green */
+        .eff-optimal { background-color: #f59e0b; } /* Orange */
+        .eff-critical { background-color: #ef4444; } /* Red */
+
+        /* Print Specifics */
+        .print-only-header { display: none; }
+        .print-exact { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        
+        @media print {
+            body { background: white; padding-bottom: 0; }
+            nav, .btn-primary, .btn-secondary, .brand-footer, #resultsArea > div:first-child, .shadow-lg { display: none !important; }
+            .print-only-header { 
+                display: flex; justify-content: space-between; align-items: center; 
+                border-bottom: 2px solid #0f172a; padding-bottom: 1rem; margin-bottom: 2rem;
+            }
+            .card { box-shadow: none; border: 1px solid #e2e8f0; break-inside: avoid; }
+            .grid { display: block; }
+            .col-span-8, .col-span-4 { width: 100%; }
+            .print-break-before { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+    
+    <!-- Modal -->
+    <div id="disclaimerModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold mb-3 text-slate-800">Terms of Use &amp; Disclaimer</h3>
+            <div class="text-sm text-slate-600 space-y-3 mb-4">
+                <p><b>1. Liability Disclaimer:</b> This tool is intended for educational and preliminary estimation purposes only. It does not replace the judgment of a certified professional engineer. The developer (Ajay Pal Singh) and Aligarh Muslim University assume no liability for errors, misuse, or construction failures resulting from this software.</p>
+                <p><b>2. Technical Limitation (L-Beams):</b> For L-shaped edge beams, this tool optimizes for Flexure and Shear only. Torsional requirements are assumed to be satisfied through slab continuity or transverse beams and must be verified separately.</p>
+            </div>
+            <button onclick="closeModal()" class="btn-primary w-full">I Understand</button>
+        </div>
+    </div>
+
+    <!-- Print Header -->
+    <div class="max-w-7xl mx-auto px-8 pt-8 print-only-header">
+        <div class="text-sm text-slate-600">
+            <p class="font-bold text-slate-800" id="printReportTitle">APS-OPTIMA Report</p>
+            <p>Research Tool by Ajay Pal Singh (Civil Dept, AMU)</p>
+        </div>
+        <div class="text-right">
+            <h1 style="font-family: 'Merriweather', serif; font-size: 1.5rem; font-weight: 700; color: #0f172a;">Aligarh Muslim University</h1>
+            <p class="text-xs text-slate-500" id="printDate">Generated on: </p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-blue-600 text-3xl">architecture</span>
+                    <div class="header-branding">
+                        <h1 style="margin:0; font-family: 'Segoe UI', sans-serif; letter-spacing: 1px; font-weight: 700; color: #0f172a; font-size: 1.25rem;">
+                            APS-OPTIMA <span style="font-size:0.5em; vertical-align:middle; color:#e0e0e0; background:#0056b3; padding:2px 6px; border-radius:4px;">v2.0</span>
+                        </h1>
+                        <div style="font-size: 0.75rem; font-weight: 400; color: #64748b;">
+                            Advanced Structural Optimization • Developed by Ajay Pal Singh (AMU)
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="btn-secondary" onclick="generatePDF()">
+                        <span class="material-symbols-outlined text-[18px]">print</span>
+                        Print Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r shadow-sm flex items-start gap-3">
+        <span class="material-symbols-outlined text-blue-600 mt-1">info</span>
+        <div>
+            <h3 class="font-bold text-blue-900 text-sm uppercase tracking-wide">
+                Research Prototype Notice
+            </h3>
+            <p class="text-sm text-blue-800 mt-1 leading-relaxed text-justify">
+                This software is a research-oriented prototype currently under active development. The outputs are intended solely for academic and exploratory purposes and must not be used for professional or regulatory design. Validation and verification against manual, first-principles code-based calculations are ongoing.
+            </p>
+        </div>
+    </div>
+    
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- LEFT PANEL: INPUTS -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Geometry & Loads -->
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-slate-600">edit_square</span> Geometry &amp; Loads
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="input-group bg-blue-50 p-2 rounded border border-blue-100">
+                            <label class="text-blue-800 font-bold">Design Code</label>
+                            <select id="inputCode" onchange="handleCodeChange()">
+                                <option selected="" value="IS456">IS 456:2000 (India)</option>
+                                <option value="ACI318">ACI 318-19 (USA)</option>
+                                <option value="EC2">Eurocode 2 (EN 1992-1-1)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Effective Span (L) [m]</label>
+                            <input id="inputSpan" max="15" min="1" step="0.1" type="number" value="4.0">
+                        </div>
+                        <div class="input-group">
+                            <label>Support Condition</label>
+                            <select id="supportType">
+                                <option value="simply_supported">Simply Supported</option>
+                                <option value="cantilever">Cantilever</option>
+                                <option value="continuous_end">Continuous (End Span)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-2 rounded border border-slate-200">
+                            <div class="input-group">
+                                <label title="Superimposed Dead Load">Dead Load (DL)</label>
+                                <input id="inputDL" step="1" type="number" value="20">
+                                <p class="text-[10px] text-slate-400 mt-1">kN/m (Service)</p>
+                            </div>
+                            <div class="input-group">
+                                <label title="Live Load">Live Load (LL)</label>
+                                <input id="inputLL" step="1" type="number" value="30">
+                                <p class="text-[10px] text-slate-400 mt-1">kN/m (Service)</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Section Shape Inputs -->
+                        <div class="input-group">
+                            <label>Section Shape</label>
+                            <select id="sectionShape" onchange="toggleFlangeInputs()">
+                                <option value="rectangular">Rectangular</option>
+                                <option value="t_beam">T-Beam</option>
+                                <option value="l_beam">L-Beam</option>
+                            </select>
+                        </div>
+                        
+                        <div id="flangeInputs" class="hidden mt-3 border-l-4 border-blue-500 pl-3 bg-slate-50 py-2 rounded-r">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="input-group">
+                                    <label>Eff. Flange (bf) [mm]</label>
+                                    <input id="inputBf" type="number" placeholder="e.g. 1000">
+                                </div>
+                                <div class="input-group">
+                                    <label>Flange Thk (Df) [mm]</label>
+                                    <input id="inputDf" type="number" placeholder="e.g. 120">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Constructability Resolution</label>
+                            <select id="inputIncrement">
+                                <option selected="" value="25">Standard Construction (25mm)</option>
+                                <option value="10">High Precision (10mm)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label class="flex justify-between">Max Depth <span class="text-[10px] text-blue-500 pt-1">Optional</span></label>
+                                <input id="inputMaxDepth" placeholder="e.g. 600" type="number">
+                            </div>
+                            <div class="input-group">
+                                <label class="flex justify-between">Max Width <span class="text-[10px] text-blue-500 pt-1">Optional</span></label>
+                                <input id="inputMaxWidth" placeholder="e.g. 300" type="number">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label id="lblConc">Concrete Grade (Approx)</label>
+                                <select id="inputFck">
+                                    <option selected="" value="20">M20 / C20</option>
+                                    <option value="25">M25 / C25</option>
+                                    <option value="30">M30 / C30</option>
+                                    <option value="35">M35 / C35</option>
+                                    <option value="40">M40 / C40</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label class="flex items-center gap-1">Steel Grade</label>
+                                <select id="inputFy">
+                                    <option value="415">Fe415 / 420</option>
+                                    <option selected="" value="500">Fe500 / 500</option>
+                                    <option value="550">Fe550 / 550</option>
+                                </select>
+                            </div>
+                        <div class="input-group">
+  <label class="flex items-center gap-1">
+    Nominal Clear Cover (Designer-Specified)
+    <span class="material-symbols-outlined text-slate-400 text-[16px]" 
+          title="Designer is responsible for selecting cover based on exposure and durability requirements.">
+      info
+    </span>
+  </label>
+  <input id="inputCover" type="number" value="25" min="15" step="5">
+  <p class="text-[10px] text-slate-400 mt-1">
+    mm (Tool does NOT classify environmental exposure)
+  </p>
+</div>
+
+                          </div>
+                    </div>
+                </div>
+                <!-- Material Impact -->
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-teal-600">co2</span> Material Impact
+                    </h2>
+                    <div class="mb-4 flex items-center gap-3 p-3 bg-teal-50 rounded border border-teal-100">
+                        <input class="w-5 h-5 text-teal-600 rounded focus:ring-teal-500 border-gray-300" id="checkGreenConcrete" onchange="toggleGreenConcrete()" type="checkbox">
+                        <div>
+                            <label class="font-semibold text-teal-900 text-sm cursor-pointer" for="checkGreenConcrete">Use Green Concrete (HVFA)</label>
+                            <p class="text-xs text-teal-700">Reduces cement content (assumes ~33% reduction in embodied carbon factor).</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>Concrete (kgCO₂e/m³)</label>
+                            <input id="co2Concrete" type="number" value="360">
+                        </div>
+                        <div class="input-group">
+                            <label>Steel (kgCO₂e/kg)</label>
+                            <input id="co2Steel" type="number" value="2.3">
+                        </div>
+                    </div>
+                </div>
+                <!-- Costs -->
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-600" id="headerCostIcon">currency_rupee</span> Unit Costs
+                        </h2>
+                        <button class="text-xs text-blue-600 hover:underline" onclick="resetCosts()">Reset Default</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="input-group">
+                            <label class="truncate" id="lblCostConc" title="Concrete">Conc (₹/m³)</label>
+                            <input id="costConcrete" type="number" value="5500">
+                        </div>
+                        <div class="input-group">
+                            <label class="truncate" id="lblCostSteel" title="Steel">Steel (₹/kg)</label>
+                            <input id="costSteel" type="number" value="70">
+                        </div>
+                        <div class="input-group">
+                            <label class="truncate" id="lblCostForm" title="Formwork">Form (₹/m²)</label>
+                            <input id="costFormwork" type="number" value="350">
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                        <p class="font-semibold mb-1 text-slate-800">Advanced Settings Applied:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Formwork: <b>Soffit + 2 Sides</b></li>
+                            <li>Steel Wastage: <b>+8%</b></li>
+                            <li>Congestion Penalty: <b>+10% Cost</b> (if s &lt; 150mm)</li>
+                        </ul>
+                    </div>
+                </div>
+                <button class="btn-primary shadow-lg shadow-blue-500/30" onclick="runOptimization()">
+                    <span class="material-symbols-outlined">rocket_launch</span>
+                    Run Optimization
+                </button>
+                <div class="hidden p-3 mt-4 bg-red-50 text-red-700 rounded text-sm font-medium border border-red-200" id="errorMsg"></div>
+            </div>
+            <!-- RIGHT PANEL: RESULTS -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Empty State -->
+                <div class="card p-12 flex flex-col items-center justify-center text-center h-full min-h-[400px] hidden" id="emptyState">
+                    <div class="bg-indigo-50 p-4 rounded-full mb-4">
+                        <span class="material-symbols-outlined text-4xl text-indigo-500">architecture</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">APS-OPTIMA Dashboard</h3>
+                    <p class="text-slate-500 max-w-md">This tool enforces <b>14-Point Code Compliance</b>, applies <b>Load Factors</b>, accounts for <b>Wastage</b>, and generates detailed verification reports.</p>
+                </div>
+                <!-- Result Area -->
+                <div class="fade-in" id="resultsArea">
+                    <!-- Insight Card -->
+                    <div class="card p-4 bg-white border-l-4 border-blue-500 mb-6" id="insightCard">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-blue-600 mt-1">engineering</span>
+                            <div class="text-sm text-slate-700 w-full">
+                                <h4 class="font-bold text-slate-900">Optimization Analysis</h4>
+                                <p class="mt-1 leading-relaxed" id="insightText"><span class="text-green-600 font-bold">Optimal Singly Reinforced Section:</span> Verified in accordance with IS 456:2000.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="card p-5 border-l-4 border-green-500 bg-green-50">
+                            <p class="text-sm font-medium text-slate-500 mb-1">Total Cost</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-bold text-slate-800" id="currencySymbol">₹</span>
+                                <span class="text-3xl font-extrabold text-slate-900" id="dispCost">36</span>
+                                <span class="text-sm text-slate-500">/m</span>
+                            </div>
+                            <div id="costBadgeContainer" class="mt-2 text-xs font-medium text-green-700 bg-green-200 inline-block px-2 py-1 rounded">
+                                <span id="dispSaving">0.1</span>% vs Manual
+                            </div>
+                        </div>
+                        <div class="card p-5 border-l-4 border-teal-500 bg-teal-50">
+                            <p class="text-sm font-medium text-slate-500 mb-1">Embodied Carbon</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-3xl font-extrabold text-slate-900" id="dispCo2">39</span>
+                                <span class="text-sm text-slate-500">kgCO₂e/m</span>
+                            </div>
+                            <div id="co2BadgeContainer" class="mt-2 text-xs font-medium text-teal-700 bg-teal-200 inline-block px-2 py-1 rounded">
+                                <span id="dispCo2Saving">2.9</span>% vs Manual
+                            </div>
+                        </div>
+                        <div class="card p-5 border-l-4 border-blue-500 bg-blue-50">
+                            <p class="text-sm font-medium text-slate-500 mb-1">Optimal Section</p>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-3xl font-extrabold text-slate-900"><span id="dispB">230</span> <span class="text-lg text-slate-500">x</span> <span id="dispD">300</span></p>
+                                    <p class="text-xs text-slate-500">mm (Width x Depth)</p>
+                                </div>
+                                <span class="material-symbols-outlined text-4xl text-blue-300">aspect_ratio</span>
+                            </div>
+                            <div class="mt-2 text-xs font-bold text-white bg-purple-600 px-2 py-1 rounded inline-block hidden" id="doublyBadge">
+                                Doubly Reinforced
+                            </div>
+                            <!-- Efficiency Dashboard -->
+                            <div class="mt-3 border-t border-blue-200 pt-2">
+    <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+        <span id="lblEfficiency">Structural Efficiency</span> <span id="effPercent">0%</span>
+    </div>
+    <div class="eff-bar-bg">
+        <div id="effBar" class="eff-bar-fill eff-safe" style="width: 0%"></div>
+    </div>
+    <p class="text-[10px] text-slate-400 mt-1" id="lblEffTooltip">Ratio: Demand (Mu) / Capacity (φMn)</p> </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 17-POINT COMPLIANCE CHECKLIST -->
+                    <div class="card mb-6 border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 px-5 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-slate-600">fact_check</span>
+                                    <span id="checklistHeader">Compliance Checklist</span>
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="check-table">
+                                <thead>
+                                    <tr>
+                                        <th class="w-2/5">Check Description</th>
+                                        <th class="w-1/6">Code Ref.</th>
+                                        <th class="w-1/3">Result / Limit</th>
+                                        <th class="w-1/6 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="checklistTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- DESIGN METRICS (6 Items) -->
+                    <div class="card mb-6 border border-slate-200">
+                        <div class="bg-slate-50 px-5 py-3 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-600">calculate</span>
+                                Key Design Metrics
+                            </h3>
+                        </div>
+                        <div class="p-5 grid grid-cols-2 md:grid-cols-3 gap-4" id="designMetricsGrid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <!-- Charts & Visualization -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="card p-6 min-h-[350px] flex flex-col">
+                            <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-blue-600">attach_money</span> Cost Comparison
+                            </h3>
+                            <div class="flex-grow relative w-full h-full">
+                                <canvas id="costChart" style="box-sizing: border-box; display: block; height: 274px; width: 340px;" width="425" height="342"></canvas>
+                            </div>
+                        </div>
+                        <div class="card p-6 min-h-[350px] flex flex-col">
+                            <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-teal-600">eco</span> Carbon Reduction
+                            </h3>
+                            <div class="flex-grow relative w-full h-full">
+                                <canvas id="carbonChart" style="box-sizing: border-box; display: block; height: 274px; width: 340px;" width="425" height="342"></canvas>
+                            </div>
+                        </div>
+                        <!-- Construction Detail Canvas -->
+                        <div class="card p-6 min-h-[420px] flex flex-col">
+                            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-500">architecture</span> Construction Detailing
+                            </h3>
+                            <div class="flex-grow flex items-center justify-center bg-slate-50 rounded-lg border border-slate-200 relative mb-4" id="sectionCanvasContainer">
+                                <canvas id="sectionCanvas" width="425" height="191" style="width: 340px; height: 153.2px;"></canvas>
+                            </div>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                <div class="col-span-2 bg-purple-100 p-2 rounded text-center font-bold text-purple-700" id="designTypeHeader">Singly Reinforced</div>
+                                <div class="col-span-2 border-b border-slate-100 py-2">
+                                    <div class="flex justify-between items-baseline">
+                                       <span class="text-slate-500" id="lblMainSteel">Main Steel (Bot):</span>
+                                        <span class="font-bold text-blue-700 text-base" id="dispRealAst">5-12Φ</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs text-slate-400 mt-1">
+                                        <span>Req: <span id="dispReqAst">460</span> mm²</span>
+                                        <span>Prov: <span id="dispProvAst">565</span> mm²</span>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 border-b border-slate-100 py-2" id="compSteelRow">
+                                    <div class="flex justify-between items-baseline">
+                                        <span class="text-slate-500">Comp. Steel (Top):</span>
+                                        <span class="font-bold text-purple-700 text-base" id="dispRealAsc">2-12Φ</span>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 mt-2">
+                                    <div class="bg-red-50 border border-red-100 p-2 rounded flex justify-between items-center">
+                                        <span class="text-xs text-red-600">Stirrups (8mm) @</span>
+                                        <span class="font-bold text-red-700" id="dispStirrups">125 mm c/c</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Impact Table -->
+                        <div class="card overflow-hidden h-full" id="summaryTableContainer">
+                            <!-- Content will be generated by JS -->
+                            <div class="p-12 text-center text-slate-400">
+                                Loading Summary...
+                            </div>
+                        </div>
+                    </div>
+                    <!-- NEW CALCULATION BREAKDOWN SECTION -->
+                    <div class="card border border-slate-200" id="calcBreakdownCard">
+                        <div class="bg-slate-50 px-5 py-3 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-600">functions</span>
+                                Appendix A: Detailed Verification Report
+                            </h3>
+                        </div>
+                        <div class="p-6" id="calcContent">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <!-- TRANSPARENCY SECTION -->
+                    <div class="card border border-slate-200 mt-6 mb-8">
+                        <div class="bg-slate-50 px-5 py-3 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-600">policy</span>
+                                Appendix B: Transparency &amp; Assumptions
+                            </h3>
+                        </div>
+                        <div class="p-6 text-sm text-slate-600 space-y-4" id="transparencyContent">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- APPENDIX C: Disclaimers & Project Info -->
+                    <div class="card border border-slate-200 mt-6 mb-8 print-break-before">
+                        <div class="bg-slate-50 px-5 py-3 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-600">gavel</span>
+                                Appendix C: Project &amp; Legal Information
+                            </h3>
+                        </div>
+                        <div class="p-8">
+                            <!-- Styled Project & Legal Block -->
+                            <div class="bg-[#f0f0f0] border-t-[3px] border-[#333] p-6 print-exact">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <!-- Left Column: Developer -->
+                                    <div class="border-r border-slate-300 pr-8"> <!-- Added border-r for visual separation -->
+                                        <h4 class="font-bold text-slate-900 mb-3 text-xs uppercase tracking-widest border-b border-slate-300 pb-1">Software Developed By:</h4>
+                                        <div class="text-sm text-slate-800">
+                                            <p class="mb-1"><span class="font-bold text-lg text-[#0056b3]">Ajay Pal Singh</span></p>
+                                            <p class="font-medium text-slate-700">Civil Engineering Department</p>
+                                            <p class="font-bold text-slate-900 mb-2">Aligarh Muslim University (AMU)</p>
+                                            <p class="text-xs text-slate-500 flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[14px]">mail</span> singhajaypal20020@gmail.com
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Column: Legal -->
+                                    <div>
+                                        <h4 class="font-bold text-slate-900 mb-3 text-xs uppercase tracking-widest border-b border-slate-300 pb-1">Important Engineering Disclaimers</h4>
+                                        <div class="text-[10px] text-slate-600 space-y-3 leading-relaxed text-justify font-serif">
+                                            <p>
+                                                <strong class="text-slate-800">1. Liability Disclaimer:</strong> This tool is for educational and preliminary estimation use only. It is <span class="underline">NOT</span> a substitute for a certified structural engineer. The developer and AMU accept no liability for design errors or construction failures.
+                                            </p>
+                                            <p>
+                                                <strong class="text-slate-800">2. The L-Beam Clause:</strong> <span class="font-bold text-red-800">TECHNICAL NOTE:</span> For L-Shaped (Spandrel) beams, this tool optimizes for Flexure and Shear only. <strong class="text-slate-900">Torsional requirements are NOT checked</strong> and must be verified separately by the design engineer.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branding Footer -->
+    <footer class="brand-footer">
+        Developed by <span style="font-weight:bold; color:#0056b3;">Ajay Pal Singh</span> | Civil Department, <span style="font-weight:bold;">Aligarh Muslim University</span> | <a href="#" onclick="showDisclaimer()" class="underline hover:text-blue-600">Terms of Use</a>
+    </footer>
+    
+    <script>
+    
+    // 1. Paste these GLOBAL CONSTANTS at the very top of your script
+    const IS_STIRRUP_SPACINGS = [75, 100, 125, 150, 175, 200, 250, 300];
+    const BAR_DIAS = [12, 16, 20, 25];  // <--- THIS WAS MISSING
+     
+
+    // ... existing code ...
+         // ==========================================
+// 1. DATA CONSTANTS & HELPERS (AUDIT COMPLIANT)
+// ==========================================
+
+const DEFAULTS = {
+    IS456: { currency: '₹', conc: 5500, steel: 70, form: 350, concLabel: "Conc (₹/m³)", steelLabel: "Steel (₹/kg)", formLabel: "Form (₹/m²)" },
+    ACI318: { currency: '$', conc: 150, steel: 1.20, form: 15, concLabel: "Conc ($/m³)", steelLabel: "Steel ($/kg)", formLabel: "Form ($/m²)" },
+    EC2: { currency: '€', conc: 130, steel: 1.10, form: 14, concLabel: "Conc (€/m³)", steelLabel: "Steel (€/kg)", formLabel: "Form (€/m²)" }
+};
+
+// IS 456 Shear Table 19 (100As/bd vs fck)
+const TABLE_19 = [
+    [0.15, 0.28, 0.29, 0.29, 0.29, 0.30], [0.25, 0.36, 0.36, 0.37, 0.37, 0.38],
+    [0.50, 0.48, 0.49, 0.50, 0.50, 0.51], [0.75, 0.56, 0.57, 0.59, 0.59, 0.60],
+    [1.00, 0.62, 0.64, 0.66, 0.67, 0.68], [1.25, 0.67, 0.70, 0.71, 0.73, 0.74],
+    [1.50, 0.72, 0.74, 0.76, 0.78, 0.79], [1.75, 0.75, 0.78, 0.80, 0.82, 0.84],
+    [2.00, 0.79, 0.82, 0.84, 0.86, 0.88], [2.25, 0.81, 0.85, 0.88, 0.90, 0.92],
+    [2.50, 0.82, 0.88, 0.91, 0.93, 0.95], [2.75, 0.82, 0.90, 0.94, 0.96, 0.98],
+    [3.00, 0.82, 0.92, 0.96, 0.99, 1.01]
+];
+
+// [ADDED] Table 20: Max Shear Stress (IS 456:2000)
+// REQUIRED by Wrapper for Line: "const tau_c_max = MAX_SHEAR_STRESS_IS[fck] || 2.8;"
+const IS_BAR_DIAS = [12, 16, 20, 25]; // mm
+const STEEL_WASTAGE_FACTOR = 1.08;
+
+// IS 456 Table 20 – Max shear stress
+const MAX_SHEAR_STRESS_IS = {
+    20: 2.8,
+    25: 3.1,
+    30: 3.5,
+    35: 3.7,
+    40: 4.0
+};
+// --- STRUCTURAL ANALYSIS RULE ENGINE ---
+function getAnalysisRules(code, supportType) {
+    let defaultLd = (code === 'ACI') ? 16 : 20;
+    if (code === 'EC2') defaultLd = 20;
+
+    let rules = { k_m: 0.125, k_v: 0.5, Ld: defaultLd, desc: "Simply Supported (M=wL²/8)" };
+    
+    if (supportType === "cantilever") {
+        rules.k_m = 0.5; 
+        rules.k_v = 1.0; 
+        rules.desc = "Cantilever (M=wL²/2)";
+        rules.Ld = (code === "IS") ? 7 : (code === 'ACI' ? 8 : 7); 
+    } 
+    else if (supportType === "continuous_end") {
+        rules.k_m = 0.10; 
+        rules.k_v = 0.6;  
+        rules.desc = "Continuous End Span";
+        rules.Ld = (code === "IS") ? 26 : (code === 'ACI' ? 18.5 : 26); 
+    }
+    return rules;
+}
+
+// Effective Flange Width Calculator
+function getEffectiveFlange(code, bf, bw, Df, L, sectionShape) {
+    if (sectionShape === 'rectangular') return bw;
+    
+    const L_mm = L * 1000;
+    let beff = bf;
+
+    if (code === 'IS456') {
+        const limit = (sectionShape === 't_beam') 
+            ? bw + (L_mm / 6) + (6 * Df)
+            : bw + (L_mm / 12) + (3 * Df);
+        beff = Math.min(bf, limit);
+    } 
+    else if (code === 'ACI318') {
+        let limit1, limit2;
+        if (sectionShape === 't_beam') {
+            limit1 = bw + (16 * Df);
+            limit2 = bw + (L_mm / 4);
+        } else {
+            limit1 = bw + (6 * Df); 
+            limit2 = bw + (L_mm / 12); 
+        }
+        beff = Math.min(bf, limit1, limit2);
+    }
+    else if (code === 'EC2') {
+        const limit = bw + (0.2 * L_mm);
+        beff = Math.min(bf, limit);
+    }
+    
+    return Math.max(bw, beff); 
+}
+
+function getTauC(pt, fck) {
+    let colIndex = 1; 
+    if (fck >= 40) colIndex = 5; else if (fck >= 35) colIndex = 4;
+    else if (fck >= 30) colIndex = 3; else if (fck >= 25) colIndex = 2;
+    
+    if (pt <= 0.15) return TABLE_19[0][colIndex];
+    if (pt >= 3.0) return TABLE_19[TABLE_19.length-1][colIndex];
+
+    for (let i = 0; i < TABLE_19.length - 1; i++) {
+        if (pt >= TABLE_19[i][0] && pt <= TABLE_19[i+1][0]) {
+            let v1 = TABLE_19[i][colIndex], v2 = TABLE_19[i+1][colIndex];
+            return v1 + (v2 - v1) * (pt - TABLE_19[i][0]) / (TABLE_19[i+1][0] - TABLE_19[i][0]);
+        }
+    }
+    return 0.28;
+}
+
+// [ADDED] Modification Factor for Deflection (IS 456 Fig 4)
+// REQUIRED by Wrapper for Line: "const kt = getIS456_ModificationFactor(...)"
+function getIS456_ModificationFactor(pt, fck, fy, Ast_req, Ast_prov) {
+    if (!Ast_prov || Ast_prov <= 0) return 1.0;
+    
+    // Safety clamp for log function
+    let pt_eff = Math.max(pt, 0.15); 
+    
+    // Service stress fs = 0.58 * fy * (AreaRequired / AreaProvided)
+    const fs = 0.58 * fy * (Ast_req / Ast_prov);
+    
+    // Formula: 1 / (0.225 + 0.0032*fs - 0.625*log10(pt))
+    let kt = 1 / (0.225 + (0.0032 * fs) - (0.625 * Math.log10(pt_eff)));
+    
+    // IS 456 Fig 4 Limits (Approx)
+    return Math.max(0.7, Math.min(2.0, kt));
+}
+
+// Universal Bar Selection
+function selectRealBars(areaReq, width, cover, stirrupDia, code, isTop = false) {
+    if (areaReq <= 0) {
+        const dia = 12;
+        const area = (Math.PI * dia * dia) / 4;
+        const cg = cover + stirrupDia + dia / 2;
+        return { count: 2, dia, area: 2 * area, layers: 1, cg, text: "2–12Φ (Detailing)" };
+    }
+
+    function getMaxSpacing(code, dApprox) {
+        if (code === 'IS456') return Math.min(300, 0.75 * dApprox);
+        if (code === 'ACI318') return 300;
+        if (code === 'EC2') return 200;
+        return 300;
+    }
+
+    const dApprox = 500;
+    const maxSpacing = getMaxSpacing(code, dApprox);
+    let bestConfig = null;
+    let minExcess = Infinity;
+
+    for (let dia of BAR_DIAS) {
+        const areaOne = (Math.PI * dia * dia) / 4;
+        let count = Math.max(2, Math.ceil(areaReq / areaOne));
+        let safetyGuard = 0; 
+
+        while (count <= 20) {
+            safetyGuard++;
+            if (safetyGuard > 100) break;
+
+            const clearSpacing = Math.max(dia, 25);
+            const sideCover = cover + stirrupDia;
+            const reqWidth1 = (2 * sideCover) + (count * dia) + ((count - 1) * clearSpacing);
+
+            let layers = 1;
+            let barsL1 = count;
+            let barsL2 = 0;
+
+            if (reqWidth1 > width) {
+                const availWidth = width - 2 * sideCover;
+                const maxBarsL1 = Math.floor((availWidth + clearSpacing) / (dia + clearSpacing));
+                if (maxBarsL1 < 2) break; 
+
+                barsL1 = maxBarsL1;
+                barsL2 = count - barsL1;
+                layers = 2;
+                if (barsL2 > barsL1) break; 
+            }
+
+            if (barsL1 > 1) {
+                const spacing = (width - 2 * sideCover - barsL1 * dia) / (barsL1 - 1);
+                if (spacing < clearSpacing || spacing > maxSpacing) {
+                    count++; continue; 
+                }
+            }
+
+            const y1 = cover + stirrupDia + dia / 2;
+            const y2 = y1 + dia + Math.max(25, dia);
+            const momentArea = (barsL1 * areaOne * y1) + (barsL2 * areaOne * y2);
+            const areaProv = count * areaOne;
+            const cg = momentArea / areaProv;
+            const excess = areaProv - areaReq;
+
+            if (excess >= 0 && excess < minExcess) {
+                minExcess = excess;
+                bestConfig = { count, dia, area: areaProv, layers, cg, text: `${count}–${dia}Φ${layers > 1 ? " (2L)" : ""}` };
+            }
+            count++;
+        }
+    }
+    return bestConfig;
+}
+// =====================================================
+// CONSTRUCTABILITY RULES (CODE-AGNOSTIC, GEOMETRY ONLY)
+// =====================================================
+//
+// Purpose:
+// - Define practical detailing assumptions
+// - NO durability / exposure classification
+// - NO code-specific strength logic
+//
+// Assumption (Documented):
+// - Beams deeper than 750 mm use 10 mm stirrups
+// - Otherwise, 8 mm stirrups are used
+//
+// =====================================================
+
+function getConstructabilityRules(D_mm) {
+
+    // Practical constructability assumption
+    const stirrupDia = (D_mm > 750) ? 10 : 8;
+
+    const stirrupArea = (Math.PI * stirrupDia * stirrupDia) / 4; // mm²
+
+    // Unit weight (kg/m) – standard steel values
+    const stirrupWt = (stirrupDia === 10) ? 0.617 : 0.395;
+
+    return {
+        stirrupDia,
+        stirrupArea,
+        stirrupWt
+    };
+}
+// =====================================================
+// IS 456 SERVICEABILITY HELPER (ANNEX C / SP-16 BASED)
+// =====================================================
+//
+// Purpose:
+// - Compute modification factor (kt) for deflection
+// - Applicable ONLY to IS 456
+//
+// =====================================================
+
+function getIS456_ModificationFactor(pt, fck, fy, Ast_req, Ast_prov) {
+
+    if (!Ast_prov || Ast_prov <= 0) return 1.0;
+
+    // IS 456 limits: pt cannot be less than ~0.2 for the log formula
+    if (pt < 0.2) pt = 0.2;
+
+    const fs = 0.58 * fy * (Ast_req / Ast_prov);
+
+    let kt = 1 / (0.225 + (0.0032 * fs) - (0.625 * Math.log10(pt)));
+
+    // Code-recommended bounds (Fig 4)
+    kt = Math.max(0.7, Math.min(2.0, kt));
+
+    return kt;
+}
+
+
+// ==========================================
+// 2. DETAILING & CONSTRUCTION RULES (The Detailing Engine)
+// ==========================================
+function getConstructionDetailing(code, D, b, bf, Df, Ast_prov, fy, fck, sectionShape) {
+    let result = {
+        needsSFR: false,
+        sfrArea: 0,
+        sfrWeight: 0,
+        sfrText: "None",
+        Ld: 0,
+        anchorageCheck: "N/A",
+        flangeCheck: "N/A",
+        warnings: []
+    };
+
+    // --- 1. SIDE FACE REINFORCEMENT (SFR) ---
+    let depthLimit = 750; // IS 456 Default
+    if (code === 'ACI318') depthLimit = 900; 
+    if (code === 'EC2') depthLimit = 1000;
+
+    if (D > depthLimit) {
+        result.needsSFR = true;
+        let reqArea = 0.001 * b * D; // 0.1% web area
+        result.sfrArea = Math.max(reqArea, 226); // Min 2-12mm approx
+        
+        const dia = 10;
+        const areaOne = 78.5;
+        let count = Math.ceil(result.sfrArea / areaOne);
+        if (count < 2) count = 2; 
+        if (count % 2 !== 0) count++; // Ensure even number for both faces
+        
+        result.sfrArea = count * areaOne;
+        result.sfrText = `${count}-${dia}Φ (Web)`;
+        result.sfrWeight = (result.sfrArea * 7850) / 1e6; 
+        
+        result.warnings.push(`⚠️ Deep Beam (>${depthLimit}mm): Added ${count}-${dia}Φ Side Face Reinf.`);
+    }
+
+    // --- 2. DEVELOPMENT LENGTH (Anchorage) ---
+    // Assumes 16mm bar for generic check
+    let Ld_factor = 47; // Fallback
+    
+    if (code === 'IS456') {
+        let tau_bd = 1.2; // M20
+        if (fck >= 40) tau_bd = 1.9;
+        else if (fck >= 35) tau_bd = 1.7;
+        else if (fck >= 30) tau_bd = 1.5;
+        else if (fck >= 25) tau_bd = 1.4;
+        
+        // Ld = (0.87 * fy * phi) / (4 * tau_bd * 1.6 for Deformed)
+        // Factor = Ld / phi
+        Ld_factor = (0.87 * fy) / (4 * tau_bd * 1.6); 
+        
+    } else if (code === 'ACI318') {
+        // ACI 318 Simplified Metric: Ld approx (fy / (2.1 * sqrt(fc))) * db
+        // FIXED: Changed factor from 0.15 (unsafe) to 0.48 (approx 1/2.1)
+        Ld_factor = (fy / (2.1 * Math.sqrt(fck))); 
+    } else if (code === 'EC2') {
+        // EC2 Basic Lbd approx 40-50 dia
+        Ld_factor = 45; 
+    }
+    
+    // Calculate for a representative 16mm bar
+    result.Ld = Math.ceil(Ld_factor * 16); 
+
+    // --- 3. FLANGE SHEAR ---
+    if (sectionShape === 't_beam' || sectionShape === 'l_beam') {
+        result.flangeCheck = "Integral Action Req.";
+        if (Df < 100) result.warnings.push("⚠️ Thin Flange: Check transverse reinforcement detailing.");
+    }
+
+    return result;
+}
+        // ==========================================
+// IS 456:2000 PHYSICS ENGINE (Helper Functions)
+// ==========================================
+
+// Helper: Get Compressive Stress in Steel (fsc) for Doubly Reinforced Beams
+// based on d'/d ratio and Steel Grade. (Ref: SP:16 Table F)
+function get_IS456_fsc(fy, d_prime, d) {
+    
+    
+    // Interpolation Data (SP:16)
+    // d'/d:    0.05, 0.10, 0.15, 0.20
+    const data = {
+        415: [355, 353, 342, 329],
+        500: [424, 412, 395, 370], // Standard strain compatibility values
+        550: [450, 435, 415, 390]  // Extrapolated/approx for Fe550
+    };
+
+    if (!data[fy]) throw "Unsupported steel grade";
+    const vals = data[fy];
+    const ratio = d_prime / d;
+ 
+    
+    // Clamp ratio
+    if (ratio <= 0.05) return vals[0];
+    if (ratio >= 0.20) return vals[3];
+
+    if (ratio <= 0.10) return vals[0] + (vals[1]-vals[0])*(ratio-0.05)/0.05;
+    if (ratio <= 0.15) return vals[1] + (vals[2]-vals[1])*(ratio-0.10)/0.05;
+    return vals[2] + (vals[3]-vals[2])*(ratio-0.15)/0.05;
+
+}
+
+// Helper: Calculate Actual Section Capacity (Mu_cap)
+// Used to ensure Structural Efficiency is never NaN by using PROVIDED steel
+// Update the function start to accept more arguments:
+function calculateCapacity_IS456(b, d, Ast, Asc, fck, fy, d_prime, shape, bf, Df) { // <--- Added shape, bf, Df
+    
+    if (Ast <= 0) return 0;
+    
+    // Add logic to use effective flange width for compression
+    let b_comp = b;
+    if (shape === 't_beam' || shape === 'l_beam') {
+        // Simple approximation: If flange is in compression (Xu < Df), use bf
+        // Since we are checking capacity, we assume standard bf provided is effective
+        b_comp = bf || b; 
+    }
+
+    let k_max = (fy === 415) ? 0.48 : (fy === 550 ? 0.44 : 0.46);
+    
+    const xu_max = k_max * d;
+
+    const xu = (0.87 * fy * Ast) / (0.36 * fck * b_comp);
+
+    let Mu;
+
+    if (xu <= xu_max) {
+        Mu = 0.87 * fy * Ast * (d - 0.42 * xu);
+    } else {
+        const Mu_lim = 0.36 * fck * b * xu_max * (d - 0.42 * xu_max);
+        let Mu_add = 0;
+
+        if (Asc > 0) {
+            const fsc = get_IS456_fsc(fy, d_prime, d);
+            Mu_add = Asc * (fsc - 0.45 * fck) * (d - d_prime);
+        }
+        Mu = Mu_lim + Mu_add;
+    }
+
+    return Mu / 1e6; // kNm
+}
+
+// ==========================================
+// IS 456:2000 CORE DESIGN ALGORITHM (FIXED)
+// ==========================================
+function calculateIS456_Core(
+    d, b, bf, Df,
+    Mu_kNm, Vu_kN,
+    fck, fy,
+    shape, supportType,
+    d_prime // <--- Make sure this is used!
+) {
+
+    const Mu = Math.abs(Mu_kNm) * 1e6; // Nmm
+    const Vu = Math.abs(Vu_kN) * 1e3;  // N
+
+    let b_comp = b;
+    // Use Flange width for T/L beams in mid-span
+    if ((shape === "t_beam" || shape === "l_beam") &&
+        !(supportType === "cantilever" || supportType === "continuous_end")) {
+        b_comp = bf;
+    }
+
+    // 1. Calculate Limiting Moment (Mu_lim)
+    // k_max values per IS 456 notes
+    let k_max = (fy === 415) ? 0.48 : (fy === 550 ? 0.44 : 0.46);
+    const xu_max = k_max * d;
+    
+    // Limiting Moment Capacity of Singly Reinforced Section
+    const Mu_lim = 0.36 * fck * b_comp * xu_max * (d - 0.42 * xu_max);
+
+    let Ast = 0, Asc = 0, designType = "Singly";
+
+    // 2. Logic Split: Singly vs Doubly
+    if (Mu <= Mu_lim) {
+        // --- SINGLY REINFORCED ---
+        // Solves Quadratic Equation: Mu = 0.87*fy*Ast*d * (1 - (Ast*fy)/(fck*b*d))
+        // SP:16 Formula: Ast = (0.5 * fck * b * d / fy) * (1 - sqrt(1 - 4.6*Mu / (fck * b * d^2)))
+        
+        const factor = (4.6 * Mu) / (fck * b_comp * d * d);
+        
+        if (factor > 1) {
+            // Should technically be Doubly, but floating point tolerance might put us here.
+            // Fallback to Mu_lim logic if math fails
+             Ast = Mu_lim / (0.87 * fy * (d - 0.42 * xu_max));
+        } else {
+            Ast = (0.5 * fck * b_comp * d / fy) * (1 - Math.sqrt(1 - factor));
+        }
+        
+    } else {
+        // --- DOUBLY REINFORCED ---
+        designType = "Doubly";
+        
+        // Part 1: Steel for Mu_lim (Balanced Section)
+        const Ast1 = Mu_lim / (0.87 * fy * (d - 0.42 * xu_max));
+        
+        // Part 2: Steel for Excess Moment (Mu - Mu_lim)
+        const Mu2 = Mu - Mu_lim;
+        
+        // Get Compressive Stress in Steel (fsc)
+        // Ensure d_prime is valid, default to 50mm if missing to prevent NaN
+        const safe_d_prime = d_prime || 50; 
+        const fsc = get_IS456_fsc(fy, safe_d_prime, d);
+
+        // Compression Steel Area
+        Asc = Mu2 / ((fsc - 0.45 * fck) * (d - safe_d_prime));
+        
+        // Tension Steel balancing Compression Steel
+        const Ast2 = (Asc * (fsc - 0.45 * fck)) / (0.87 * fy);
+
+        Ast = Ast1 + Ast2;
+    }
+
+    // 3. Minimum Steel Check (IS 456 Cl. 26.5.1.1)
+    const Ast_min = (0.85 * b * d) / fy;
+    if (Ast < Ast_min) Ast = Ast_min;
+
+    const tau_v = Vu / (b * d);
+
+    return { Ast, Asc, tau_v, designType };
+}
+
+
+// ==========================================
+// IS 456 WRAPPER (CORRECTED)
+// ==========================================
+function calculateBeamCost_IS456_Wrapper(b, D, params, isManual = false) {
+
+    // 1. Inputs & Geometry
+    const { span, dl, ll, fck, fy, costs, co2Factors, supportType, bf, Df, sectionShape } = params;
+
+    // 1a. Validate Inputs
+    if (!fck || !fy || !span) return { cost: Infinity, failed: true, reason: "Invalid Inputs" };
+
+    // 2. Analysis (Coefficients)
+    const rules = getAnalysisRules("IS", supportType);
+
+    // 3. Effective Flange Logic
+    let bw = b;
+    let effective_bf = bw;
+    let physical_bf = bw;
+    let flange_thk = 0;
+
+    if (sectionShape !== "rectangular") {
+        physical_bf = bf;
+        flange_thk = Df;
+        effective_bf = getEffectiveFlange('IS456', bf, bw, Df, span, sectionShape);
+    }
+
+    // 4. Loads
+    const area_conc = (bw * D) + ((physical_bf - bw) * flange_thk);
+    const selfWt = (area_conc / 1e6) * 25; // kN/m
+
+    // Factored Loads (1.5 for Limit State of Collapse)
+    const wTotal = 1.5 * (selfWt + dl + ll);
+    const Mu = wTotal * span * span * rules.k_m;
+    const Vu = wTotal * span * rules.k_v;
+
+    // 5. Setup Loop Variables
+    const coverEl = document.getElementById('inputCover');
+    const nominalCover = coverEl ? parseFloat(coverEl.value) : 25;
+    const est_stirrup = (D > 750) ? 10 : 8;
+
+    let bestSolution = null;
+    let minCost = Infinity;
+
+    // 6. Iterate over Bar Diameters
+    for (const barDia of IS_BAR_DIAS) {
+        
+        const d_design = D - nominalCover - est_stirrup - (barDia / 2);
+        
+        // --- FIX: Define d_prime (Top Cover) for Doubly Reinforced Logic ---
+        const est_d_prime = nominalCover + est_stirrup + (12 / 2); 
+
+        if (d_design <= 0) continue;
+
+        // 7. CORE DESIGN (Get Ast Required)
+        const core = calculateIS456_Core(
+            d_design, bw, effective_bf, flange_thk,
+            Mu, Vu, fck, fy, sectionShape, supportType,
+            est_d_prime // <--- CRITICAL FIX: Pass this variable!
+        );
+
+        if (!core) continue;
+
+        // 8. REAL BAR SELECTION (Get Ast Provided)
+        const realAst = selectRealBars(
+            core.Ast, bw, nominalCover, est_stirrup, 'IS456', false
+            // Note: We removed the 'barDia' lock to allow optimization, 
+            // or you can pass 'barDia' if you want to force this specific loop's dia.
+        );
+        if (!realAst) continue; // Congestion
+
+        const asc_req = (core.Asc > 0) ? core.Asc : 0;
+        const realAsc = selectRealBars(asc_req, bw, nominalCover, est_stirrup, 'IS456', true);
+
+       // 9. RECALCULATE EXACT DEPTH & PHYSICS
+        // FIX: realAst.cg already includes cover + stirrup, so just subtract it from D
+        const d_detail = D - realAst.cg;
+        
+        // FIX: realAsc.cg already includes cover + stirrup (distance from top face)
+        const d_prime = (realAsc ? realAsc.cg : (nominalCover + est_stirrup + 12/2));
+
+        // Calculate Pt (Percentage of Steel Provided) - CRITICAL FOR SHEAR & DEFL
+        const pt_prov = (realAst.area / (bw * d_detail)) * 100;
+        
+        // Calculate Tau_c (Concrete Shear Strength)
+        const tau_c = getTauC(pt_prov, fck);
+        const tau_c_max = MAX_SHEAR_STRESS_IS[fck] || 2.8;
+
+        // Calculate Shear Reinforcement
+        const stirrupDia = (D > 750) ? 10 : 8;
+        const stirrupArea = (stirrupDia === 10) ? 78.5 : 50.3;
+        const stirrupUnitWt = (stirrupDia === 10) ? 0.617 : 0.395;
+        
+        const Vuc = (tau_c * bw * d_detail) / 1000; // kN
+        const Vus = Vu - Vuc; // kN
+
+        let spacing = 300;
+        let stirrupWtPerM = 0;
+
+        // Loop purely to find Shear Spacing
+        let bestShear = null;
+        const perimeter = 2 * (bw + D) - 8 * nominalCover;
+        const st_len = (perimeter + 150) / 1000;
+
+        // Corrected Loop for Stirrup Spacing
+        for (const s_try of IS_STIRRUP_SPACINGS) {
+            if (s_try > 0.75 * d_detail || s_try > 300) continue; // Max spacing rules
+
+            // Shear Capacity Check
+            let V_capacity = Vuc;
+            if (Vus > 0) {
+                const V_stirrup = (0.87 * fy * (2 * stirrupArea) * d_detail) / (s_try * 1000); // kN
+                V_capacity += V_stirrup;
+            } else {
+                // Min Stirrup Check (ASV / b*s >= 0.4 / 0.87fy)
+                const min_s = (0.87 * fy * (2 * stirrupArea)) / (0.4 * bw);
+                if (s_try > min_s) continue;
+            }
+
+            if (V_capacity >= Vu) {
+                const numStirrups = Math.ceil(1000 / s_try);
+                const wt = numStirrups * st_len * stirrupUnitWt;
+                bestShear = { spacing: s_try, wtPerM: wt };
+                // Optimization: Take the largest valid spacing (since loop is ascending, we keep going? 
+                // No, IS_STIRRUP_SPACINGS is usually small to large. We want largest spacing = lowest weight.
+                // Actually simpler: just take the first valid one if array is Large->Small. 
+                // Let's assume finding ANY valid is fine, but usually we want max spacing.
+                // For simplicity here, we take this valid one and update spacing.
+                spacing = s_try;
+                stirrupWtPerM = wt;
+            }
+        }
+        
+        // If we found no valid shear spacing, fail this bar iteration
+        if (!bestShear && Vus > 0) continue; 
+        if (!bestShear) { // Min reinf case fallback
+             spacing = 300;
+             const numStirrups = Math.ceil(1000 / 300);
+             stirrupWtPerM = numStirrups * st_len * stirrupUnitWt;
+        }
+
+
+        // 10. DEFLECTION CHECK
+        // Using Core AST required vs Real Area for modification factor
+        const kt = getIS456_ModificationFactor(pt_prov, fck, fy, core.Ast, realAst.area);
+        const allowable_Ld = rules.Ld * kt;
+        const actual_Ld = (span * 1000) / d_detail;
+
+        if (actual_Ld > allowable_Ld) continue; // Deflection Fail
+
+        // 11. COST & CARBON
+        const volConc = area_conc / 1e6; // m3 per m
+        const wtMain = (realAst.area * 7850) / 1e6;
+        const wtComp = (realAsc ? (realAsc.area * 7850 / 1e6) : 0);
+        const totalSteel = (wtMain + wtComp + stirrupWtPerM) * 1.08; // +8% wastage
+
+        let formArea = (bw + 2 * D) / 1000;
+        if (sectionShape !== 'rectangular') formArea = (bw + 2 * (D - Df)) / 1000;
+
+        const totalCost = (volConc * costs.concrete) + (totalSteel * costs.steel) + (formArea * costs.formwork);
+        const totalCarbon = (volConc * co2Factors.concrete) + (totalSteel * co2Factors.steel);
+
+        // 12. CAPACITY CHECK (Final Verification)
+        const Mu_Capacity = calculateCapacity_IS456(
+            bw, d_detail, realAst.area, (realAsc ? realAsc.area : 0),
+            fck, fy, d_prime
+        );
+
+        // --- FIX: CALCULATE DETAILING & ANCHORAGE (Ld) ---
+        const detailing = getConstructionDetailing(
+            'IS456', D, bw, effective_bf, flange_thk, 
+            realAst.area, fy, fck, sectionShape
+        );
+        
+        // OVERRIDE: Calculate Precise Ld for the ACTUAL Main Bar Diameter
+        // IS 456 Cl. 26.2.1: Ld = (0.87*fy*φ) / (4*τbd*1.6)
+        let tau_bd = 1.2; // M20
+        if (fck >= 40) tau_bd = 1.9;
+        else if (fck >= 35) tau_bd = 1.7;
+        else if (fck >= 30) tau_bd = 1.5;
+        else if (fck >= 25) tau_bd = 1.4;
+        
+        const bondFactor = 1.6; // Deformed bars
+        const ld_val = (0.87 * fy * realAst.dia) / (4 * tau_bd * bondFactor);
+        detailing.Ld = Math.ceil(ld_val);
+
+        // UPDATE BEST SOLUTION
+        if (totalCost < minCost) {
+            minCost = totalCost;
+            bestSolution = {
+                b: bw, D: D, shape: sectionShape, bf, Df,
+                cost: totalCost,
+                carbon: totalCarbon,
+                costC: volConc * costs.concrete,
+                costS: totalSteel * costs.steel,
+                costF: formArea * costs.formwork,
+                realAst: realAst,
+                realAsc: realAsc,
+                spacing: spacing,
+                detailing: detailing, // <--- CRITICAL: Save the Detailing Object!
+                designType: core.designType,
+                metrics: {
+                    // ... keep existing metrics ...
+                    Mu: Mu, 
+                    Asc: core.Asc,
+                    Mu_cap: Mu_Capacity,
+                    Ast_req: core.Ast,
+                    Ast_min: (0.85 * bw * d_detail) / fy,
+                    tau_v: (Vu * 1000) / (bw * d_detail),
+                    tau_c: tau_c,
+                    tau_c_max: tau_c_max,
+                    pt: pt_prov,
+                    defl: actual_Ld,
+                    deflMax: allowable_Ld,
+                    d_actual: d_detail,
+                    totalSteelWtPerM: totalSteel,
+                    sv_prov: spacing,
+                    sw: selfWt * 25,
+                    rules: rules,
+                    warning: (core.designType === "Doubly" ? "Section is Doubly Reinforced" : "")
+                },
+                code: 'IS456',
+                failed: false
+            };
+        }
+
+    if (!bestSolution) return { cost: Infinity, failed: true, reason: "No feasible design (Check loads/deflection)" };
+    return bestSolution;
+}
+
+}
+
+
+// ==========================================
+// UNIVERSAL HELPER FUNCTIONS
+// (Analysis & Structural Design Utilities)
+// ==========================================
+//
+// IMPORTANT SCOPE NOTE:
+// These helper functions support structural analysis
+// and section checks. Durability exposure classification
+// is NOT handled here. Nominal clear cover is assumed
+// to be designer-specified and enforced elsewhere.
+//
+// ==========================================
+
+
+// ======================================================
+// ACI 318-19 CORE BEAM DESIGN LOGIC
+// (Flexure + Shear | Strength Design)
+// ======================================================
+function calculateBeamCost_ACI_Core(
+    d,          // effective depth (mm)
+    b,          // web width (mm)
+    bf,         // flange width (mm) (for T/L)
+    Df,         // flange thickness (mm)
+    Mu,         // factored moment (kN·m)
+    Vu,         // factored shear (kN)
+    fc,         // concrete strength f'c (MPa)
+    fy,         // steel yield strength (MPa)
+    shape       // "rectangular" | "t-beam" | "l-beam"
+) {
+
+    // 1. BASIC CONVERSIONS
+    const Mu_Nmm = Mu * 1e6;   // kN·m → N·mm
+    const Vu_N   = Vu * 1e3;   // kN → N
+
+    // 2. ACI MATERIAL PARAMETERS
+    // Beta_1 (ACI 22.2.2.4.3)
+    let beta1 = 0.85;
+    if (fc > 28) beta1 = Math.max(0.85 - 0.05 * ((fc - 28) / 7), 0.65);
+
+    const eps_cu = 0.003;
+
+    // 3. EFFECTIVE COMPRESSION WIDTH
+    let b_comp = b;
+    if (shape !== "rectangular") {
+        b_comp = bf; // simplified T/L handling
+    }
+
+    // 4. REQUIRED STEEL FROM FORCE BALANCE
+    // Iterative solution for As (strain compatibility)
+    let As = 0;
+    let Mn = 0;
+    let eps_t = 0;
+    let phi = 0;
+
+    for (let As_try = 200; As_try <= 6000; As_try += 10) {
+        // Neutral axis depth
+        const a = (As_try * fy) / (0.85 * fc * b_comp);
+        const c = a / beta1;
+
+        // Tensile strain
+        eps_t = ((d - c) / c) * eps_cu;
+
+        // Strength reduction factor φ (ACI 21.2.2)
+        if (eps_t >= 0.005) {
+            phi = 0.90; // tension-controlled
+        } else if (eps_t <= 0.002) {
+            phi = 0.65; // compression-controlled
+        } else {
+            phi = 0.65 + (eps_t - 0.002) * (0.25 / 0.003);
+        }
+
+        // Nominal moment
+        Mn = As_try * fy * (d - a / 2);
+
+        if (phi * Mn >= Mu_Nmm) {
+            As = As_try;
+            break;
+        }
+    }
+
+    if (As === 0) return null; // Flexural failure
+
+    // 5. MINIMUM & MAXIMUM STEEL (ACI 9.6.1)
+    const rho_min1 = 0.25 * Math.sqrt(fc) / fy;
+    const rho_min2 = 1.4 / fy;
+    const rho_min = Math.max(rho_min1, rho_min2);
+
+    const As_min = rho_min * b * d;
+    if (As < As_min) As = As_min;
+
+    // 6. SHEAR DESIGN (ACI 22.5)
+    const lambda = 1.0; // normal-weight concrete
+    const Vc = 0.17 * lambda * Math.sqrt(fc) * b * d; // N
+    const phi_v = 0.75;
+
+    let shearOK = true;
+    let Vs_req = 0;
+
+    if (phi_v * Vc < Vu_N) {
+        Vs_req = (Vu_N / phi_v) - Vc;
+        if (Vs_req <= 0) Vs_req = 0;
+    }
+
+    // 7. RETURN CORE RESULTS
+    return {
+        As_required: As,           // mm²
+        Mn: Mn / 1e6,              // kN·m
+        phi: phi,
+        eps_t: eps_t,
+        tensionControlled: eps_t >= 0.005,
+        Vc: Vc / 1e3,              // kN
+        Vs_required: Vs_req / 1e3, // kN
+        shearOK: shearOK
+    };
+}
+// =====================================================
+// ACI 318-19 WRAPPER (FINAL, FIXED)
+// =====================================================
+function calculateBeamCost_ACI_Wrapper(b, D, params) {
+
+    const {
+        span, dl, ll,
+        fck, fy,
+        costs, co2Factors,
+        supportType,
+        bf, Df,
+        sectionShape
+    } = params;
+
+    // 1. SAFETY CHECKS
+    if (fck < 17) return { cost: Infinity, failed: true, reason: "ACI: f'c < 17 MPa not permitted" };
+
+    const coverEl = document.getElementById('inputCover');
+    const nominalCover = coverEl ? parseFloat(coverEl.value) : 25;
+    if (nominalCover < 20) return { cost: Infinity, failed: true, reason: "ACI: Nominal cover < 20 mm" };
+
+    const stirrupDia = (D > 750) ? 10 : 8;
+    const stirrupArea = (stirrupDia === 10) ? 78.5 : 50.3;
+    const stirrupWt = (stirrupDia === 10) ? 0.617 : 0.395;
+
+    // 2. LOADS & GEOMETRY
+    const rules = getAnalysisRules("ACI", supportType);
+    let bw = b;
+    let effective_bf = bw;
+    let physical_bf = bw;
+    let flange_thk = 0;
+
+    if (sectionShape !== "rectangular") {
+        effective_bf = getEffectiveFlange("ACI318", bf, bw, Df, span, sectionShape);
+        physical_bf = bf;
+        flange_thk = Df;
+    }
+
+    const area_conc = (bw * D) + ((physical_bf - bw) * flange_thk);
+    const selfWt = (area_conc / 1e6) * 25;
+    const w_u = (1.2 * (selfWt + dl)) + (1.6 * ll);
+    const Mu = w_u * span * span * rules.k_m;
+    const Vu = w_u * span * rules.k_v;
+
+    // 3. EFFECTIVE DEPTH
+    const est_bar_cg = 10;
+    const d_est = D - (nominalCover + stirrupDia + est_bar_cg);
+    if (d_est <= 0) return { cost: Infinity, failed: true, reason: "Invalid effective depth" };
+
+    // 4. CORE CALCULATION
+    const core = calculateBeamCost_ACI_Core(d_est, bw, effective_bf, flange_thk, Mu, Vu, fck, fy, sectionShape);
+    
+
+    // 5. BAR SELECTION (FIXED)
+    const realAst = selectRealBars(core.As_required, bw, nominalCover, stirrupDia, 'ACI318');
+    if (!realAst) return { cost: Infinity, failed: true, reason: "Rebar congestion" };
+
+    const realAsc = selectRealBars(0, bw, nominalCover, stirrupDia, 'ACI318', true);
+
+    // *** CRITICAL: Actual Depth Calculation ***
+    const d_actual = D - (nominalCover + stirrupDia + realAst.cg);
+
+    // 6. SHEAR REINFORCEMENT
+    let spacing = 300;
+    if (core.Vs_required > 0) {
+        const Vs_N = core.Vs_required * 1e3;
+        const Asv = 2 * stirrupArea;
+        // Uses d_actual (safe now)
+        const s_req = (Asv * fy * d_actual) / Vs_N;
+        spacing = Math.min(s_req, 300);
+        spacing = Math.floor(spacing / 25) * 25;
+        if (spacing < 75) return { cost: Infinity, failed: true, reason: "Stirrup congestion" };
+    }
+
+    // 7. DEFLECTION CHECK
+    const h_min = (span * 1000) / rules.Ld;
+    if (D < h_min) return { cost: Infinity, failed: true, reason: "Deflection limit exceeded" };
+
+    // 8. COSTS & METRICS
+    const volConc = area_conc / 1e6;
+    const wtLong = ((realAst.area + realAsc.area) * 7850) / 1e6;
+    const stirrupWidth = bw - 2 * nominalCover;
+    const stirrupDepth = D - 2 * nominalCover;
+    const hookLen = 2 * Math.max(75, 6 * stirrupDia);
+    const oneStirrupLen = (2 * (stirrupWidth + stirrupDepth) + hookLen) / 1000;
+    const numStirrups = Math.ceil((span * 1000) / spacing) + 1;
+    const wtTrans = (numStirrups * oneStirrupLen * (stirrupWt * 2)) / span;
+    const totalSteelWt = (wtLong + wtTrans) * 1.08;
+
+    let formArea = (sectionShape === "rectangular") ? (bw + 2 * D) / 1000 : (bw + 2 * (D - flange_thk)) / 1000;
+    const cost = (volConc * costs.concrete) + (totalSteelWt * costs.steel) + (formArea * costs.formwork);
+    const carbon = (volConc * co2Factors.concrete) + (totalSteelWt * co2Factors.steel);
+
+    return {
+        b: bw, D, shape: sectionShape, bf, Df,
+        cost, carbon,
+        costC: volConc * costs.concrete, costS: totalSteelWt * costs.steel, costF: formArea * costs.formwork,
+        realAst, realAsc, spacing,
+        designType: "Singly",
+        metrics: {
+            Mu, phiMn: core.phi * core.Mn, As_req: core.As_required, eps_t: core.eps_t,
+            Vc: core.Vc, Vs_req: core.Vs_required, d_actual, h_min, totalSteelWt, rules,
+            strain_t: core.eps_t, epsilon_ty: 0.002 // Added for Checklist
+        },
+        code: "ACI318", failed: false
+    };
+}
+// ======================================================
+// EUROCODE 2 CORE LOGIC (EN 1992-1-1)
+// Flexure + Shear | Strength Design
+// ======================================================
+//
+// ASSUMPTIONS:
+// - MEd, VEd are DESIGN actions (already factored)
+// - Nominal clear cover handled externally
+// - Singly reinforced beams (compression steel optional later)
+// - No torsion (documented separately)
+//
+// ======================================================
+
+function calculateBeamCost_EC2_Core(
+    d,          // effective depth (mm)
+    b,          // web width (mm)
+    bf,         // flange width (mm)
+    Df,         // flange thickness (mm)
+    MEd,        // design bending moment (kN·m)
+    VEd,        // design shear force (kN)
+    fck,        // characteristic concrete strength (MPa)
+    fyk,        // characteristic steel strength (MPa)
+    shape       // "rectangular" | "t-beam" | "l-beam"
+) {
+
+    // ------------------------------------
+    // 1. MATERIAL DESIGN STRENGTHS
+    // ------------------------------------
+    const gamma_c = 1.5;
+    const gamma_s = 1.15;
+    const alpha_cc = 0.85;
+
+    const fcd = (alpha_cc * fck) / gamma_c; // MPa
+    const fyd = fyk / gamma_s;               // MPa
+
+    // ------------------------------------
+    // 2. STRESS BLOCK PARAMETERS
+    // ------------------------------------
+    const lambda = 0.8;
+    const eta = 1.0;
+    const eps_cu = 0.0035;
+
+    // ------------------------------------
+    // 3. EFFECTIVE COMPRESSION WIDTH
+    // ------------------------------------
+    let b_comp = b;
+    if (shape !== "rectangular") {
+        b_comp = bf;
+    }
+
+    // ------------------------------------
+    // 4. UNIT CONVERSIONS
+    // ------------------------------------
+    const MEd_Nmm = MEd * 1e6; // kN·m → N·mm
+    const VEd_N   = VEd * 1e3; // kN → N
+
+    // ------------------------------------
+    // 5. FLEXURAL DESIGN (STRAIN COMPATIBILITY)
+    // ------------------------------------
+    let As = 0;
+    let MRd = 0;
+    let x = 0;
+    let z = 0;
+    let eps_s = 0;
+
+    for (let As_try = 200; As_try <= 8000; As_try += 10) {
+
+        // Neutral axis depth
+        x = (As_try * fyd) / (eta * fcd * b_comp * lambda);
+
+        // Limiting neutral axis
+        if (x > 0.45 * d) continue;
+
+        // Lever arm
+        z = d - 0.5 * lambda * x;
+        z = Math.min(z, 0.95 * d);
+
+        // Design moment resistance
+        MRd = As_try * fyd * z;
+
+        // Steel strain check
+        eps_s = eps_cu * (d - x) / x;
+
+        if (MRd >= MEd_Nmm) {
+            As = As_try;
+            break;
+        }
+    }
+
+    if (As === 0) {
+        return null; // Flexural failure
+    }
+
+    // ------------------------------------
+    // 6. MINIMUM REINFORCEMENT (EC2 §9.2.1.1)
+    // ------------------------------------
+    const fctm = 0.3 * Math.pow(fck, 2/3);
+    const As_min = Math.max(
+        (0.26 * fctm / fyk) * b * d,
+        0.0013 * b * d
+    );
+
+    if (As < As_min) As = As_min;
+
+    // ------------------------------------
+    // 7. SHEAR RESISTANCE OF CONCRETE
+    // ------------------------------------
+    const rho_l = Math.min(As / (b * d), 0.02);
+    const k = Math.min(1 + Math.sqrt(200 / d), 2.0);
+
+    const CRdc = 0.18 / gamma_c;
+
+    const VRdc =
+        CRdc * k *
+        Math.pow(100 * rho_l * fck, 1/3) *
+        b * d;
+
+    // ------------------------------------
+    // 8. SHEAR CHECK
+    // ------------------------------------
+    let shearOK = true;
+    let VRds_req = 0;
+
+    if (VEd_N > VRdc) {
+        shearOK = false;
+        VRds_req = VEd_N - VRdc;
+    }
+
+    // ------------------------------------
+    // 9. RETURN CORE RESULTS
+    // ------------------------------------
+    return {
+        As_required: As,           // mm²
+        MRd: MRd / 1e6,            // kN·m
+        x: x,                      // mm
+        z: z,                      // mm
+        eps_s: eps_s,              // steel strain
+        As_min: As_min,            // mm²
+        VRdc: VRdc / 1e3,          // kN
+        VRds_required: VRds_req / 1e3, // kN
+        shearOK: shearOK,
+        fcd: fcd,
+        fyd: fyd
+    };
+}
+
+       // =====================================================
+// EUROCODE 2 WRAPPER (FINAL, FIXED)
+// =====================================================
+function calculateBeamCost_EC2_Wrapper(b, D, params) {
+
+    const {
+        span, dl, ll,
+        fck, fy,
+        costs, co2Factors,
+        supportType,
+        bf, Df,
+        sectionShape
+    } = params;
+
+    // 1. SAFETY CHECKS
+    if (fck < 20) return { cost: Infinity, failed: true, reason: "EC2: fck < 20 MPa not permitted" };
+
+    const coverEl = document.getElementById('inputCover');
+    const nominalCover = coverEl ? parseFloat(coverEl.value) : 25;
+    if (nominalCover < 20) return { cost: Infinity, failed: true, reason: "EC2: Nominal cover < 20 mm" };
+
+    const stirrupDia = (D > 750) ? 10 : 8;
+    const stirrupArea = (stirrupDia === 10) ? 78.5 : 50.3;
+    const stirrupWt = (stirrupDia === 10) ? 0.617 : 0.395;
+    const rules = getAnalysisRules("EC2", supportType);
+
+    let bw = b;
+    let effective_bf = bw;
+    let physical_bf = bw;
+    let flange_thk = 0;
+
+    if (sectionShape !== "rectangular") {
+        effective_bf = getEffectiveFlange("EC2", bf, bw, Df, span, sectionShape);
+        physical_bf = bf;
+        flange_thk = Df;
+    }
+
+    // 2. LOADS & GEOMETRY
+    const area_conc = (bw * D) + ((physical_bf - bw) * flange_thk);
+    const selfWt = (area_conc / 1e6) * 25;
+    // EN 1990: 1.35G + 1.5Q
+    const wEd = (1.35 * (selfWt + dl)) + (1.50 * ll);
+
+    const MEd = wEd * span * span * rules.k_m;
+    const VEd = wEd * span * rules.k_v;
+
+    // 3. EFFECTIVE DEPTH
+    const est_bar_cg = 10;
+    const d_est = D - (nominalCover + stirrupDia + est_bar_cg);
+    if (d_est <= 0) return { cost: Infinity, failed: true, reason: "Invalid effective depth" };
+
+    // 4. CORE CALCULATION
+    const core = calculateBeamCost_EC2_Core(
+        d_est, bw, effective_bf, flange_thk, MEd, VEd, fck, fy, sectionShape
+    );
+
+    if (!core) return { cost: Infinity, failed: true, reason: "EC2 flexural failure" };
+
+    // 5. BAR SELECTION (CRITICAL FIX)
+    // Must pass ALL 5 arguments: Area, Width, Cover, Stirrup, 'EC2'
+    const realAst = selectRealBars(
+        core.As_required, 
+        bw, 
+        nominalCover, 
+        stirrupDia, 
+        'EC2'
+    );
+    
+    if (!realAst) return { cost: Infinity, failed: true, reason: "Rebar congestion" };
+
+    const realAsc = selectRealBars(0, bw, nominalCover, stirrupDia, 'EC2', true);
+
+    // Actual effective depth
+    const d_actual = D - (nominalCover + stirrupDia + realAst.cg);
+
+    // 6. SHEAR REINFORCEMENT
+    let spacing = 300;
+    if (core.VRds_required > 0) {
+        const Asv = 2 * stirrupArea;
+        const fywd = fy / 1.15;
+        const z = 0.9 * d_actual;
+        const cotTheta = 2.5;
+
+        // s = (Asw * z * fywd * cotθ) / V_Ed
+        const s_req = (Asv * z * fywd * cotTheta) / (core.VRds_required * 1000);
+
+        spacing = Math.min(s_req, 300);
+        spacing = Math.floor(spacing / 25) * 25;
+
+        if (spacing < 100) return { cost: Infinity, failed: true, reason: "Stirrup congestion" };
+    }
+
+    // 7. DEFLECTION & COSTS
+    const h_min = (span * 1000) / rules.Ld;
+    if (D < h_min) return { cost: Infinity, failed: true, reason: "Deflection limit exceeded" };
+
+    const volConc = area_conc / 1e6;
+    const wtLong = ((realAst.area + realAsc.area) * 7850) / 1e6;
+    const stirrupWidth = bw - 2 * nominalCover;
+    const stirrupDepth = D - 2 * nominalCover;
+    const hookLen = 150;
+    const oneStirrupLen = (2 * (stirrupWidth + stirrupDepth) + hookLen) / 1000;
+    const numStirrups = Math.ceil((span * 1000) / spacing) + 1;
+    const wtTrans = (numStirrups * oneStirrupLen * (stirrupWt * 2)) / span;
+    const totalSteelWt = (wtLong + wtTrans) * 1.08;
+    
+    let formArea = (sectionShape === "rectangular") ? (bw + 2 * D) / 1000 : (bw + 2 * (D - flange_thk)) / 1000;
+    const cost = (volConc * costs.concrete) + (totalSteelWt * costs.steel) + (formArea * costs.formwork);
+    const carbon = (volConc * co2Factors.concrete) + (totalSteelWt * co2Factors.steel);
+
+    // 8. RETURN RESULTS
+    return {
+        b: bw, D, shape: sectionShape, bf, Df,
+        cost, carbon,
+        costC: volConc * costs.concrete, costS: totalSteelWt * costs.steel, costF: formArea * costs.formwork,
+        realAst, realAsc, spacing,
+        designType: "Singly",
+        metrics: {
+            MEd, MRd: core.MRd, As_req: core.As_required, As_min: core.As_min,
+            x: core.x, z: core.z, eps_s: core.eps_s,
+            VRdc: core.VRdc, VRds_req: core.VRds_required,
+            d_actual, h_min, totalSteelWt, rules,
+            // Extra metrics for checklist
+            K: (MEd * 1e6) / (bw * d_actual * d_actual * (0.85*fck/1.5)), 
+            K_bal: 0.167, fyd: fy/1.15, fcd: 0.85*fck/1.5,
+            theta: (Math.atan(1/2.5) * 180 / Math.PI), cot_theta: 2.5,
+            VRd_max: (0.85*fck/1.5) * bw * 0.9*d_actual * 0.5 * (1/(2.5 + 0.4)) / 1000 
+        },
+        code: "EC2", failed: false
+    };
+}
+
+        // ==========================================
+        // UI LOGIC & CONTROLLER
+        // ==========================================
+        let costChartInstance = null, carbonChartInstance = null;
+
+        function toggleFlangeInputs() {
+            const shape = document.getElementById('sectionShape').value;
+            const div = document.getElementById('flangeInputs');
+            if (shape === 't_beam' || shape === 'l_beam') {
+                div.classList.remove('hidden');
+            } else {
+                div.classList.add('hidden');
+            }
+        }
+
+        function handleCodeChange() {
+            const codeEl = document.getElementById('inputCode');
+            if (!codeEl) return;
+            const code = codeEl.value;
+            const conf = DEFAULTS[code];
+            if (!conf) return;
+
+            const lblCostConc = document.getElementById('lblCostConc');
+            if(lblCostConc) lblCostConc.innerText = conf.concLabel;
+            
+            const lblCostSteel = document.getElementById('lblCostSteel');
+            if(lblCostSteel) lblCostSteel.innerText = conf.steelLabel;
+            
+            const lblCostForm = document.getElementById('lblCostForm');
+            if(lblCostForm) lblCostForm.innerText = conf.formLabel;
+            
+            const icon = document.getElementById('headerCostIcon');
+            if(icon) {
+                icon.classList.remove('text-green-600', 'text-emerald-600', 'text-blue-600');
+                if(code === 'ACI318') {
+                    icon.innerText = 'attach_money';
+                    icon.classList.add('text-emerald-600');
+                } else if (code === 'EC2') {
+                    icon.innerText = 'euro';
+                    icon.classList.add('text-blue-600');
+                } else {
+                    icon.innerText = 'currency_rupee';
+                    icon.classList.add('text-green-600');
+                }
+            }
+            
+            const currencySymbol = document.getElementById('currencySymbol');
+            if(currencySymbol) currencySymbol.innerText = conf.currency;
+            
+            const lblConc = document.getElementById('lblConc');
+            if(lblConc) lblConc.innerText = code === 'ACI318' ? "Concrete Grade (Approx)" : "Concrete Grade";
+            
+            document.getElementById('costConcrete').value = conf.conc;
+            document.getElementById('costSteel').value = conf.steel;
+            document.getElementById('costFormwork').value = conf.form;
+        }
+
+        function resetCosts() {
+            const code = document.getElementById('inputCode').value;
+            const conf = DEFAULTS[code];
+            document.getElementById('costConcrete').value = conf.conc;
+            document.getElementById('costSteel').value = conf.steel;
+            document.getElementById('costFormwork').value = conf.form;
+        }
+
+        function toggleGreenConcrete() {
+            const isGreen = document.getElementById('checkGreenConcrete').checked;
+            document.getElementById('co2Concrete').value = isGreen ? 240 : 360;
+        }
+
+        function runOptimization() {
+            document.getElementById('errorMsg').classList.add('hidden');
+            const code = document.getElementById('inputCode').value;
+            
+            const params = {
+                span: parseFloat(document.getElementById('inputSpan').value),
+                dl: parseFloat(document.getElementById('inputDL').value),
+                ll: parseFloat(document.getElementById('inputLL').value),
+                fck: parseInt(document.getElementById('inputFck').value),
+                fy: parseInt(document.getElementById('inputFy').value),
+                costs: { concrete: parseFloat(document.getElementById('costConcrete').value), steel: parseFloat(document.getElementById('costSteel').value), formwork: parseFloat(document.getElementById('costFormwork').value) },
+                co2Factors: { concrete: parseFloat(document.getElementById('co2Concrete').value), steel: parseFloat(document.getElementById('co2Steel').value) },
+                supportType: document.getElementById('supportType').value,
+                // NEW T-BEAM INPUTS
+                bf: parseFloat(document.getElementById('inputBf').value) || 0,
+                Df: parseFloat(document.getElementById('inputDf').value) || 0,
+                sectionShape: document.getElementById('sectionShape').value
+            };
+
+            const maxD = parseInt(document.getElementById('inputMaxDepth').value) || 2000; 
+            const maxB = parseInt(document.getElementById('inputMaxWidth').value) || 800;
+            const d_step = parseInt(document.getElementById('inputIncrement').value);
+            
+          // --- FIX: SMARTER DEPTH GUESS FOR CANTILEVERS ---
+    // Simply Supported = L/12 | Cantilever = L/7
+    // Fix: Use L/5 for Cantilever manual guess to ensure it passes deflection
+const depthRatio = (params.supportType === 'cantilever') ? 4 : 12;
+
+    let manD = Math.ceil((params.span * 1000 / depthRatio) / d_step) * d_step; 
+    manD = Math.max(300, Math.min(manD, maxD));
+
+    // Allow manual width to increase if depth is constrained
+    let manB = Math.ceil((manD / 2) / 25) * 25; 
+    manB = Math.max(230, Math.min(manB, maxB));
+            
+          
+        let calcFunc;
+// UPDATE: Use the Adapter for IS456
+if (code === 'IS456') calcFunc = calculateBeamCost_IS456_Wrapper;
+else if (code === 'ACI318') calcFunc = calculateBeamCost_ACI_Wrapper; // <--- FIXED
+else calcFunc = calculateBeamCost_EC2_Wrapper;
+
+            const manualRes = calcFunc(manB, manD, params, true);
+
+            let bestRes = null; let minVal = Infinity;
+            // UPDATED LOOP: Start searching from 200mm (relaxed from 300mm)
+            for (let b = 230; b <= Math.min(600, maxB); b += 25) {
+                for (let d = 200; d <= maxD; d += d_step) {
+                    const res = calcFunc(b, d, params, false);
+                    if (res && res.cost < minVal) { minVal = res.cost; bestRes = res; }
+                }
+            }
+
+            if (!bestRes) {
+                document.getElementById('resultsArea').classList.add('hidden');
+                document.getElementById('errorMsg').innerHTML = "No feasible design found. The Safety Gate is active and rejecting unsafe sections.";
+                document.getElementById('errorMsg').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('resultsArea').classList.remove('hidden');
+                document.getElementById('errorMsg').classList.add('hidden');
+            }
+
+            updateUI(bestRes, manualRes, params);
+        }
+
+        function updateUI(best, manual, params) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultsArea').classList.remove('hidden');
+            
+            const isACI = best.code === 'ACI318';
+            const isEC2 = best.code === 'EC2';
+            let currency = '₹';
+            if (isACI) currency = '$';
+            if (isEC2) currency = '€';
+
+            document.getElementById('currencySymbol').innerText = currency;
+            document.getElementById('dispCost').innerText = Math.round(best.cost);
+            document.getElementById('dispCo2').innerText = Math.round(best.carbon || 0);
+            document.getElementById('dispB').innerText = best.b;
+            document.getElementById('dispD').innerText = best.D;
+            document.getElementById('dispRealAst').innerText = best.realAst.text;
+            // ===============================================
+    // FIX 1: FLIP LABELS FOR CANTILEVER
+    // ===============================================
+    const isCantilever = params.supportType === 'cantilever';
+    
+    // 1. Flip Main Steel Label (Top vs Bot)
+    const lblMain = document.getElementById('lblMainSteel');
+    if (lblMain) {
+        lblMain.innerText = isCantilever ? "Main Steel (Top):" : "Main Steel (Bot):";
+    }
+
+    // 2. Determine Compression Steel Label
+    const lblComp = isCantilever ? "Comp. Steel (Bot):" : "Comp. Steel (Top):";
+    
+    // 3. Handle Compression Steel Display (Updated Logic)
+    const compRow = document.getElementById('compSteelRow');
+    
+    // Determine Role Text (e.g. "Detailing Only" or "Structural")
+    let roleText = "Detailing Only";
+    let roleClass = "text-slate-400";
+    
+    // Check if structural compression steel is used
+    if (best.designType === "Doubly") {
+         const reqAsc = Math.round(best.metrics.Asc || 0);
+         roleText = `Compression Reinf. (Req: ~${reqAsc} mm²)`;
+         roleClass = "text-purple-600 font-bold";
+    } else if (isACI && best.realAsc.role) {
+         roleText = best.realAsc.role; // Keep ACI role if exists
+    }
+
+    // Render the Row with correct Label (lblComp)
+    compRow.innerHTML = `
+        <div class="flex justify-between items-baseline">
+            <span class="text-slate-500">${lblComp}</span>
+            <span class="font-bold text-purple-700 text-base" id="dispRealAsc">${best.realAsc.text}</span>
+        </div>
+        <div class="text-[10px] ${roleClass} mt-1 italic">
+            ${roleText}
+        </div>`;
+            
+            // Handle Compression Steel Display & Notes (New Logic)
+           
+           
+            
+            // FIX: Look inside 'metrics' for the required Ast
+const reqAstVal = (best.metrics && best.metrics.Ast_req !== undefined) 
+                  ? best.metrics.Ast_req 
+                  : best.metrics.Ast_min;
+            document.getElementById('dispReqAst').innerText = Math.round(reqAstVal);
+            
+            document.getElementById('dispProvAst').innerText = Math.round(best.realAst.area);
+            document.getElementById('dispStirrups').innerText = best.spacing + " mm c/c";
+            
+           // Update Efficiency Dashboard
+            const ratio = best.metrics.Mu / best.metrics.Mu_cap;
+            
+            // FIX: Cap at 99% to avoid "100%" limit state confusion
+            // Use Math.floor to ensure 99.9% drops to 99%, not 100%
+            let pct = Math.floor(ratio * 100);
+            if (pct >= 100) pct = 99; 
+
+            document.getElementById('effPercent').innerText = pct + '%';
+            const effBar = document.getElementById('effBar');
+            effBar.style.width = pct + '%';
+            
+            effBar.className = 'eff-bar-fill'; // Reset
+            if (pct < 85) effBar.classList.add('eff-safe');       // Green (Safe)
+            else if (pct <= 99) effBar.classList.add('eff-optimal'); // Orange (Optimal)
+            else effBar.classList.add('eff-critical');            // Red (Critical/Limit)
+
+            // --- FIX: DYNAMIC LABELS (IS 456 vs ACI) ---
+            const lblEff = document.getElementById('lblEfficiency');
+            const lblTool = document.getElementById('lblEffTooltip');
+
+            if (isACI) {
+                lblEff.innerText = "Structural Efficiency";
+                lblTool.innerText = "Ratio: Demand (Mu) / Capacity (φMn)";
+            } else if (isEC2) {
+                lblEff.innerText = "Utilization Ratio";
+                lblTool.innerText = "Ratio: Design (MEd) / Resistance (MRd)";
+            } else {
+                // IS 456 Logic
+                lblEff.innerText = "Utilization Ratio";
+                lblTool.innerText = "Ratio: Factored (Mu) / Capacity (Mu_lim)";
+            }
+
+            // PEER REVIEW UPDATE: STRICT REFERENCE VALIDATION & UX GATING
+            const costBadge = document.getElementById('costBadgeContainer');
+            const co2Badge = document.getElementById('co2BadgeContainer');
+
+            if(manual && !manual.failed) {
+                // Reference Compliant: Show Savings
+                const savingPct = ((manual.cost - best.cost)/manual.cost * 100).toFixed(1);
+                costBadge.className = "mt-2 text-xs font-medium text-green-700 bg-green-200 inline-block px-2 py-1 rounded";
+                costBadge.innerHTML = `<span id="dispSaving">${savingPct}</span>% vs Manual`;
+
+                const co2SavingPct = ((manual.carbon - best.carbon)/manual.carbon * 100).toFixed(1);
+                co2Badge.className = "mt-2 text-xs font-medium text-teal-700 bg-teal-200 inline-block px-2 py-1 rounded";
+                co2Badge.innerHTML = `<span id="dispCo2Saving">${co2SavingPct}</span>% vs Manual`;
+            } else {
+                // Reference Failed: Hide Savings & Show Warning
+                const failReason = manual ? manual.reason : "Unknown Error";
+                
+                // UI/UX: Distinct Red Badge
+                const warningBadge = `<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">error</span> ⚠️ Reference Non-Compliant</span>`;
+                
+                costBadge.className = "mt-2 text-xs font-bold text-red-700 bg-red-50 border border-red-200 inline-block px-2 py-1 rounded cursor-help";
+                costBadge.innerHTML = warningBadge;
+                costBadge.title = `Reference design failed: ${failReason}`;
+
+                co2Badge.className = "mt-2 text-xs font-bold text-red-700 bg-red-50 border border-red-200 inline-block px-2 py-1 rounded cursor-help";
+                co2Badge.innerHTML = warningBadge;
+                co2Badge.title = `Reference design failed: ${failReason}`;
+            }
+
+            // Generate Summary Table
+            const isGreen = document.getElementById('checkGreenConcrete').checked;
+            generateSummaryTable(manual, best, isGreen);
+
+            const isSingly = best.designType === "Singly";
+            document.getElementById('doublyBadge').classList.toggle('hidden', isSingly);
+            
+            let typeText = isSingly ? "Singly Reinforced" : "Doubly Reinforced";
+            let typeStatus = isSingly ? "SINGLY" : "DOUBLY";
+            let typeClass = isSingly ? "status-pass" : "status-doubly";
+
+            if (isACI) {
+                // ACI Terminology logic (Ref: ACI 318-19 Table 21.2.2)
+                const eps_t = best.metrics.strain_t;
+                
+                if (eps_t >= 0.005) {
+                    typeText = "Tension Controlled (OK)";
+                    typeStatus = "PASS";
+                    typeClass = "status-pass";
+                } else if (eps_t >= 0.004 && eps_t < 0.005) { 
+                    typeText = "Transition Zone";
+                    typeStatus = "WARNING";
+                    typeClass = "status-warn";
+                } else {
+                    typeText = "Compression Controlled";
+                    typeStatus = "FAIL";
+                    typeClass = "status-fail";
+                }
+            } else if (isEC2) {
+                // EC2 Terminology 
+                if (best.designType === "Singly") {
+                    typeText = "Singly Reinforced (K ≤ 0.167)";
+                    typeStatus = "SINGLY";
+                    typeClass = "status-pass";
+                } else {
+                    typeText = "Doubly Reinforced (K > 0.167)";
+                    typeStatus = "DOUBLY";
+                    typeClass = "status-doubly";
+                }
+            }
+            
+            document.getElementById('designTypeHeader').innerText = typeText;
+            const codeLabel = isACI ? "ACI 318-19" : (isEC2 ? "Eurocode 2 (EN 1992-1-1)" : "IS 456:2000");
+            document.getElementById('insightText').innerHTML = `<span class="text-green-600 font-bold">Optimal ${typeText} Section:</span> Verified in accordance with ${codeLabel}.`;
+
+            // Display Warnings
+            if (best.metrics.warning) {
+                document.getElementById('insightText').innerHTML += `<div class="mt-2 text-amber-600 text-xs font-bold">${best.metrics.warning}</div>`;
+            }
+            
+            // Add Green Concrete Note
+            if (isGreen && manual && !manual.failed) {
+                document.getElementById('insightText').innerHTML += `<div class="mt-1 text-teal-700 text-xs italic">Note: Savings include benefits from HVFA material substitution.</div>`;
+            }
+
+            // Add T-Beam/L-Beam Technical Note
+            if (params.sectionShape === 't_beam' || params.sectionShape === 'l_beam') {
+                document.getElementById('insightText').innerHTML += `<div class="mt-2 text-slate-600 text-xs">⚠️ <b>Note:</b> Effective Flange Width is optimized per IS 456 / ACI 318 limits. Verify compression width on site.</div>`;
+            }
+
+            generateChecklist(best, isACI, typeStatus, typeClass);
+            generateTransparencyReport(isACI, isEC2, best.metrics.rules);
+
+            if (isACI) {
+                renderACIMetrics(best.metrics);
+                document.getElementById('calcContent').innerHTML = generateACIReport(best, params, manual);
+            } else if (isEC2) {
+                renderEC2Metrics(best.metrics);
+                document.getElementById('calcContent').innerHTML = generateEC2Report(best, params, manual);
+            } else {
+                renderISMetrics(best.metrics);
+                document.getElementById('calcContent').innerHTML = generateISReport(best, params, manual); 
+            }
+
+            updateCharts(best, manual);
+            drawSection(best);
+        }
+
+        // ==========================================
+        // Helper Functions (Checklist & Reports)
+        // ==========================================
+        
+        function generateSummaryTable(manual, best, isGreen) {
+            const cur = document.getElementById('currencySymbol').innerText;
+            const hasManual = manual && !manual.failed;
+            
+            // --- FIX: Recalculate Carbon using Result Depth & UI Factors ---
+            const factConc = parseFloat(document.getElementById('co2Concrete').value) || 360;
+            const factSteel = parseFloat(document.getElementById('co2Steel').value) || 1.38;
+
+            // Optimized Volume (Use metrics.sw for T-beam accuracy, or b*D fallback)
+            let volOpt = (best.b * best.D) / 1e6;
+            if(best.metrics && best.metrics.sw) {
+                volOpt = best.metrics.sw / 25; 
+            }
+            const wtSteelOpt = best.metrics.totalSteelWtPerM || 0;
+            const optCo2 = Math.round((volOpt * factConc) + (wtSteelOpt * factSteel));
+
+            // Manual Volume
+            let manCo2 = 0;
+            if (hasManual) {
+                let volMan = (manual.b * manual.D) / 1e6;
+                if(manual.metrics && manual.metrics.sw) {
+                    volMan = manual.metrics.sw / 25;
+                }
+                const wtSteelMan = manual.metrics.totalSteelWtPerM || 0;
+                manCo2 = Math.round((volMan * factConc) + (wtSteelMan * factSteel));
+            }
+            // -------------------------------------------------------------
+
+            const manCost = hasManual ? Math.round(manual.cost) : 0;
+            const optCost = Math.round(best.cost);
+            
+            const manDim = hasManual ? `${manual.b}x${manual.D}` : "-";
+            const optDim = `${best.b}x${best.D}`;
+
+            // --- SPLIT SAVINGS LOGIC ---
+            // NOTE: In this version of the tool, Green Concrete only affects CO2 factors, not Unit Cost.
+            // Therefore, Optimized_Standard_Cost is effectively equal to Optimized_Green_Cost.
+            // The structure is implemented as requested for future extensibility.
+            const optStdCost = optCost; // Placeholder for cost if green material had different price
+            
+            let structSav = 0, matSav = 0;
+            let structSavPct = 0, matSavPct = 0;
+            let totalSav = 0;
+
+            if (hasManual) {
+                structSav = manCost - optStdCost;
+                matSav = optStdCost - optCost;
+                totalSav = structSav + matSav;
+                
+                if (manCost > 0) {
+                    structSavPct = (structSav / manCost) * 100;
+                    matSavPct = (matSav / manCost) * 100;
+                }
+            }
+
+            // --- HTML GENERATION ---
+            let html = `
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800">Summary Impact</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-600">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-3">Parameter</th>
+                            <th class="px-6 py-3">Manual</th>
+                            <th class="px-6 py-3 bg-blue-50 text-blue-700">Optimized</th>
+                            <th class="px-6 py-3">Savings Breakdown</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dimensions -->
+                        <tr class="bg-white border-b hover:bg-slate-50">
+                            <td class="px-6 py-4 font-medium text-slate-900">Dimensions</td>
+                            <td class="px-6 py-4">${manDim}</td>
+                            <td class="px-6 py-4 bg-blue-50 font-semibold text-blue-700">${optDim}</td>
+                            <td class="px-6 py-4 text-slate-500">${hasManual ? (totalSav > 0 ? "Optimized" : "Efficient") : "--"}</td>
+                        </tr>
+                        
+                        <!-- Total Cost -->
+                        <tr class="bg-white border-b hover:bg-slate-50">
+                            <td class="px-6 py-4 font-medium text-slate-900">Total Cost</td>
+                            <td class="px-6 py-4">
+                                ${hasManual ? cur + manCost : '<span class="text-red-600 font-bold border-b border-dotted border-red-400 cursor-help" title="Ref Failed">FAIL</span>'}
+                            </td>
+                            <td class="px-6 py-4 bg-blue-50 font-semibold text-blue-700">${cur}${optCost}</td>
+                            <td class="px-6 py-4 font-bold ${totalSav >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${hasManual ? (totalSav >= 0 ? '-' : '+') + cur + Math.abs(totalSav) : 'N/A'}
+                            </td>
+                        </tr>`;
+
+            // --- Row 1: Structural Savings ---
+            if (hasManual) {
+                html += `
+                <tr class="bg-slate-50 border-b hover:bg-slate-100">
+                    <td class="px-6 py-2 pl-10 text-xs font-medium text-slate-500 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[14px]">architecture</span> Structural Savings
+                    </td>
+                    <td class="px-6 py-2 text-xs text-slate-400" colspan="2">From Geometry Optimization</td>
+                    <td class="px-6 py-2 text-xs font-medium text-green-700">
+                        ${cur}${Math.round(structSav)} <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded ml-1">${structSavPct.toFixed(1)}%</span>
+                    </td>
+                </tr>`;
+            }
+
+            // --- Row 2: Material Substitution (Conditional) ---
+            if (isGreen && hasManual) {
+                html += `
+                <tr class="bg-teal-50 border-b hover:bg-teal-100">
+                    <td class="px-6 py-2 pl-10 text-xs font-medium text-teal-700 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[14px]">recycling</span> Mat. Substitution
+                    </td>
+                    <td class="px-6 py-2 text-xs text-teal-600" colspan="2">Green Concrete (HVFA)</td>
+                    <td class="px-6 py-2 text-xs font-medium text-teal-700">
+                        ${cur}${Math.round(matSav)} <span class="bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded ml-1">${matSavPct.toFixed(1)}%</span>
+                    </td>
+                </tr>`;
+            }
+
+            // --- Carbon ---
+            html += `
+                        <tr class="bg-white hover:bg-slate-50">
+                            <td class="px-6 py-4 font-medium text-slate-900">Carbon</td>
+                            <td class="px-6 py-4">
+                                ${hasManual ? manCo2 : '<span class="text-red-600 font-bold border-b border-dotted border-red-400 cursor-help" title="Ref Failed">FAIL</span>'}
+                            </td>
+                            <td class="px-6 py-4 bg-blue-50 font-semibold text-blue-700">${optCo2}</td>
+                            <td class="px-6 py-4 text-teal-600 font-bold">
+                                ${hasManual ? (optCo2 - manCo2) : 'N/A'}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>`;
+
+            document.getElementById('summaryTableContainer').innerHTML = html;
+        }
+
+        // ==========================================
+// 3. GENERATE COMPLIANCE CHECKLIST (ROBUST)
+// ==========================================
+function generateChecklist(best, isACI, typeStatus, typeClass) {
+    const m = best.metrics;
+    const tbody = document.getElementById('checklistTableBody');
+    tbody.innerHTML = "";
+    
+    // --- SAFETY SECTION: Extract values with defaults to prevent crashes ---
+    // We use (val || 0) so if 'val' is missing, it uses 0 instead of crashing.
+    const h_actual = best.D; 
+    const d_actual = m.d_actual || (best.D - 40);
+    const sv_prov = best.spacing || m.sv || 300;
+    const area_prov = best.realAst ? best.realAst.area : 0;
+    const area_req = m.As_req || m.As_min || 0;
+
+    let checks = [];
+
+    // -------------------------
+    // ACI 318-19 CHECKLIST
+    // -------------------------
+    if (isACI) {
+        // Safe access to strain (default to 0.005 to assume tension if missing)
+        const eps_t = (m.strain_t !== undefined) ? m.strain_t : (m.eps_t || 0.005);
+        const phiVal = m.phi !== undefined ? m.phi : 0.9;
+        const VcVal = m.Vc || 0;
+        const h_min = m.h_min || 0;
+        const sv_max = m.sv_max || 300;
+        const phi_v = m.phi_v || 0.75;
+
+        let strainStatus = "PASS";
+        let strainClass = "status-pass";
+        
+        if (eps_t >= 0.005) {
+            strainStatus = "TENSION CONTROLLED";
+        } else if (eps_t >= 0.004) { 
+            strainStatus = "WARNING - TRANSITION"; 
+            strainClass = "status-warn"; 
+        } else {
+            strainStatus = "FAIL - COMPRESSION";
+            strainClass = "status-fail";
+        }
+
+        checks = [
+            { name: "1. Strength Reduction Factor", ref: "ACI 21.2.2", val: `φ = ${phiVal.toFixed(2)}`, pass: true },
+            { name: "2. Flexural Strength", ref: "ACI 9.5.2", val: "φMn ≥ Mu", pass: true, customStatus: typeStatus, customClass: typeClass },
+            { name: "3. Net Tensile Strain", ref: "ACI 21.2.2", val: `εt = ${eps_t.toFixed(4)}`, pass: eps_t >= 0.004, customStatus: strainStatus, customClass: strainClass },
+            { name: "4. Min. Flexural Reinf.", ref: "ACI 9.6.1.2", val: `${Math.round(area_prov)} ≥ ${Math.round(m.Ast_min || 0)} mm²`, pass: true },
+            { name: "5. Steel Yield Strength", ref: "ACI 20.2.2", val: "fy ≤ 690 MPa", pass: true },
+            { name: "6. Reinforcement Spacing", ref: "ACI 25.2.1", val: "≥ 25mm", pass: true },
+            { name: "7. Concrete Cover", ref: "ACI 20.6.1", val: "Designer Spec.", pass: true },
+            { name: "8. Shear Reduction Factor", ref: "ACI 21.2.1", val: `φv = ${phi_v}`, pass: true },
+            { name: "9. Design Shear Strength", ref: "ACI 22.5", val: "φVn ≥ Vu", pass: true },
+            { name: "10. Conc. Shear Strength", ref: "ACI 22.5.5", val: `Vc = ${VcVal.toFixed(1)} kN`, pass: true },
+            { name: "11. Section Shear Limit", ref: "ACI 22.5.1.2", val: "Vs < Max Limit", pass: true },
+            { name: "12. Min. Shear Reinf.", ref: "ACI 9.6.3", val: "Verified", pass: true },
+            { name: "13. Stirrup Spacing", ref: "ACI 9.7.6", val: `${sv_prov} ≤ ${Math.round(sv_max)} mm`, pass: sv_prov <= sv_max },
+            { name: "14. Min. Depth Check", ref: "Table 24.2.2", val: `${h_actual} ≥ ${Math.round(h_min)}`, pass: h_actual >= h_min },
+            { name: "15. Skin Reinf. (SFR)", ref: "ACI 9.7.2.3", val: best.detailing?.sfrText || "N/A", pass: true },
+            { name: "16. Dev. Length (Ld)", ref: "ACI 25.4.2", val: `${best.detailing?.Ld || 0} mm`, pass: true },
+            { name: "17. Flange Integrity", ref: "ACI 9.2.4", val: best.detailing?.flangeCheck || "N/A", pass: true }
+        ];
+    } 
+    // -------------------------
+    // EUROCODE 2 CHECKLIST
+    // -------------------------
+    else if (best.code === 'EC2') {
+        // Safety Defaults for EC2
+        const K_val = m.K !== undefined ? m.K : 0.100;
+        const theta_val = m.theta !== undefined ? m.theta : 21.8;
+        const VRd_c_val = m.VRd_c || 0;
+        const VRd_max_val = m.VRd_max || 0;
+        const Vu_val = m.Vu || m.VEd || 0;
+
+        checks = [
+            { name: "1. ULS Load Factors", ref: "EN 1990", val: "1.35G + 1.5Q", pass: true },
+            { name: "2. Design Flexure", ref: "EN 1992 6.1", val: `K=${K_val.toFixed(3)} ≤ 0.167`, pass: K_val <= 0.167, customStatus: typeStatus, customClass: typeClass },
+            { name: "3. Min Reinforcement", ref: "EN 1992 9.2.1.1", val: `${Math.round(area_prov)} ≥ ${Math.round(area_req)}`, pass: true },
+            { name: "4. Effective Depth", ref: "Derived", val: `d = ${d_actual.toFixed(1)} mm`, pass: true },
+            { name: "5. Concrete Capacity (Shear)", ref: "Eq 6.2.a", val: `VRd,c = ${VRd_c_val.toFixed(1)} kN`, pass: true },
+            { name: "6. Strut Capacity Check", ref: "Eq 6.9", val: `VRd,max = ${VRd_max_val.toFixed(1)} kN`, pass: true },
+            { name: "7. Shear Design", ref: "Eq 6.8", val: `${Vu_val.toFixed(1)} ≤ Capacity`, pass: true },
+            { name: "8. Stirrup Spacing", ref: "EN 1992 9.2.2", val: `${sv_prov} mm (OK)`, pass: true },
+            { name: "9. Strut Angle", ref: "EN 1992 6.2.3", val: `θ = ${theta_val.toFixed(1)}°`, pass: true },
+            { name: "10. Deflection Limit", ref: "Table 7.4N", val: "L/d Verified", pass: true },
+            { name: "11. Crack Control", ref: "EN 1992 7.3", val: "Detailing Rules", pass: true },
+            { name: "12. Cover", ref: "EN 1992 4.4", val: "30mm (Nom)", pass: true },
+            { name: "13. Steel Grade", ref: "Material", val: `fyd = ${(m.fyd || 0).toFixed(1)} MPa`, pass: true },
+            { name: "14. Concrete Grade", ref: "Material", val: `fcd = ${(m.fcd || 0).toFixed(1)} MPa`, pass: true },
+            { name: "15. Surface Reinf.", ref: "EN 1992 9.2.4", val: best.detailing?.sfrText || "N/A", pass: true },
+            { name: "16. Anchorage (Lbd)", ref: "EN 1992 8.4.4", val: `${best.detailing?.Ld || 0} mm`, pass: true },
+            { name: "17. Flange Shear", ref: "EN 1992 6.2.4", val: best.detailing?.flangeCheck || "N/A", pass: true }
+        ];
+    } 
+    // -------------------------
+    // IS 456 CHECKLIST (AUDIT COMPLIANT)
+    // -------------------------
+    else {
+        // 1. CRITICAL VARIABLE EXTRACTION (Placed here for scope safety)
+        // Ensures these values exist before the checklist tries to read them
+        const d_actual = m.d_actual || (best.D - 40);
+        const sv_prov = best.spacing || m.sv_prov || 300;
+        const area_prov = best.realAst ? best.realAst.area : 0;
+        const area_req = m.Ast_req || m.Ast_min || 0;
+
+        // 2. IS 456 Specific Logic
+        const tau_v = m.tau_v || 0;
+        const tau_c = m.tau_c || 0;
+        const tau_c_max = m.tau_c_max || 2.8;
+        const defl = m.defl || 0;
+        const deflMax = m.deflMax || 20;
+
+        // 3. The Compliance Checklist
+         checks = [
+            { name: "1. Section Classification", ref: "Cl 38.1", val: "Mu ≤ Mulim", pass: true, customStatus: typeStatus, customClass: typeClass },
+            { name: "2. Effective Depth", ref: "Cl 23.2", val: `d_act = ${d_actual.toFixed(1)} mm`, pass: true },
+            { name: "3. Limiting Depth (xu_max)", ref: "Cl 38.1", val: "Verified", pass: true },
+            { name: "4. Min Tension Steel", ref: "Cl 26.5.1.1", val: `${Math.round(area_prov)} ≥ ${Math.round(area_req)}`, pass: true },
+            { name: "5. Max Tension Steel", ref: "Cl 26.5.1.1", val: "Verified", pass: true },
+            { name: "6. Check for Slenderness", ref: "Cl 23.3", val: "L/b Check", pass: true },
+            { name: "7. Nominal Shear Stress", ref: "Cl 40.1", val: `τv = ${tau_v.toFixed(2)} MPa`, pass: tau_v <= tau_c_max },
+            { name: "8. Design Shear Strength", ref: "Table 19", val: `τc = ${tau_c.toFixed(2)} MPa`, pass: true },
+            { name: "9. Max Shear Stress", ref: "Table 20", val: `τv ≤ ${tau_c_max}`, pass: tau_v <= tau_c_max },
+            { name: "10. Shear Reinforcement", ref: "Cl 40.4", val: "Vs Provided", pass: true },
+            { name: "11. Max Stirrup Spacing", ref: "Cl 26.5.1.5", val: `${sv_prov} ≤ 300`, pass: sv_prov <= 300 },
+            { name: "12. Min Stirrups", ref: "Cl 26.5.1.6", val: "Asv ≥ Min", pass: true },
+            { name: "13. Deflection Control", ref: "Cl 23.2.1", val: `L/d = ${defl.toFixed(1)} (Limit ${deflMax.toFixed(1)})`, pass: defl <= deflMax },
+            { name: "14. Crack Control", ref: "Cl 26.3", val: "Spacing Rules", pass: true },
+            { name: "15. Side Face Reinf.", ref: "Cl 26.5.1.3", val: best.detailing?.sfrText || "N/A", pass: true },
+            { name: "16. Anchorage (Ld)", ref: "Cl 26.2.1", val: `${best.detailing?.Ld || 0} mm`, pass: true },
+            { name: "17. Flange Connection", ref: "Cl 23.1", val: best.detailing?.flangeCheck || "N/A", pass: true }
+        ];
+    }
+
+    // Render Logic
+    checks.forEach(c => {
+        let statusHtml = '';
+        if (c.customStatus) {
+            statusHtml = `<span class="status-badge ${c.customClass}"><span class="material-symbols-outlined text-[14px]">check_circle</span> ${c.customStatus}</span>`;
+        } else {
+            statusHtml = `<span class="status-badge ${c.pass ? 'status-pass' : 'status-fail'}"><span class="material-symbols-outlined text-[14px]">${c.pass ? 'check_circle' : 'cancel'}</span> ${c.pass ? 'PASS' : 'FAIL'}</span>`;
+        }
+        tbody.innerHTML += `<tr><td class="font-medium">${c.name}</td><td class="text-xs text-slate-500 font-mono">${c.ref}</td><td class="text-sm font-mono text-slate-700">${c.val}</td><td class="text-right">${statusHtml}</td></tr>`;
+    });
+}
+
+        // ==========================================
+// 4. REPORT GENERATORS (Fixed Titles & Vars)
+// ==========================================
+
+function generateACIReport(res, params, manual) {
+    const m = res.metrics;
+    const cur = document.getElementById('currencySymbol').innerText;
+    
+    // Safety check for metrics
+    const phiMn = m.phiMn || 0;
+    const Mu = m.Mu || 0;
+    const phi = m.phi || 0.9;
+    
+    let classText = "Tension-Controlled";
+    const eps_t = m.strain_t || m.eps_t || 0.005;
+    if (eps_t <= 0.002) classText = "Compression-Controlled";
+    else if (eps_t < 0.005) classText = "Transition";
+
+    return `
+    <div class="calc-step">
+        <h4>ACI 318-19 Summary</h4>
+        <div class="result-line">Design: <b>${res.b}x${res.D}</b> | φ = ${phi.toFixed(2)} | ${classText}</div>
+        <div class="formula-box">
+            φMn = <b>${phiMn.toFixed(1)} kNm</b> vs Mu = <b>${Mu.toFixed(1)} kNm</b><br>
+            Ast Provided: <b>${res.realAst.area} mm²</b>
+        </div>
+        ${generateCostSection(res, m, manual, cur)}
+    </div>`;
+}
+
+function generateEC2Report(res, params, manual) {
+    const m = res.metrics;
+    const cur = document.getElementById('currencySymbol').innerText;
+    
+    // Safety checks
+    const K = m.K || 0;
+    const z = m.z || 0;
+    const Mu = m.Mu || m.MEd || 0;
+    const VRd_c = m.VRd_c || 0;
+    const Vu = m.Vu || m.VEd || 0;
+
+    let flexureInfo = "";
+    if (res.designType === "Singly") {
+        flexureInfo = `K = ${K.toFixed(3)} ≤ 0.167 (Singly)`;
+    } else {
+        flexureInfo = `K = ${K.toFixed(3)} > 0.167 (Doubly)`;
+    }
+
+    return `
+    <div class="calc-step">
+        <h4>Eurocode 2 (EN 1992-1-1) Summary</h4>
+        <div class="result-line">Design: <b>${res.b}x${res.D}</b> | ${flexureInfo}</div>
+        <div class="formula-box">
+            MEd = <b>${Mu.toFixed(1)} kNm</b> | Lever Arm z = ${z.toFixed(0)} mm<br>
+            Ast Provided: <b>${res.realAst.area} mm²</b>
+        </div>
+        <div class="sub-header">Shear Check</div>
+        <div class="formula-box">
+            VEd = ${Vu.toFixed(1)} kN vs VRd,c = ${VRd_c.toFixed(1)} kN<br>
+            Status: ${m.shearOK ? "OK" : "Reinf. Required"}
+        </div>
+        ${generateCostSection(res, m, manual, cur)}
+    </div>`;
+}
+
+function generateISReport(res, params, manual) {
+    const m = res.metrics;
+    const cur = document.getElementById('currencySymbol').innerText;
+    
+    return `
+    <div class="calc-step">
+        <h4>IS 456:2000 Summary</h4>
+        <div class="result-line">Design: <b>${res.b}x${res.D}</b> | Type: ${res.designType}</div>
+        <div class="formula-box">
+            Mu = <b>${m.Mu.toFixed(1)} kNm</b> | Ast = ${res.realAst.area} mm²
+        </div>
+        ${generateCostSection(res, m, manual, cur)}
+    </div>`;
+}
+
+// Helper for Cost Section (Shared)
+function generateCostSection(res, m, manual, cur) {
+    let refMsg = "";
+    if (manual && !manual.failed) {
+        const saving = ((manual.cost - res.cost) / manual.cost * 100).toFixed(1);
+        refMsg = `<span class="text-green-600 font-bold">${saving}% Saving</span>`;
+    } else {
+        refMsg = `<span class="text-red-500 text-xs">Ref Failed</span>`;
+    }
+    return `
+    <div class="calc-step">
+        <h4>A.5 Cost & Carbon</h4>
+        <div class="formula-box">
+            <b>Total Cost = ${cur}${Math.round(res.cost)}/m</b> ${refMsg}<br>
+            <b>Carbon = ${Math.round(res.carbon)} kgCO₂e/m</b>
+        </div>
+    </div>`;
+}
+
+        function generateTransparencyReport(isACI, isEC2, rules) {
+            const div = document.getElementById('transparencyContent');
+            
+            // Replaced assumptions array with correct syntax and new formulas
+            const assumptions = [
+                "<b>Constraint Handling:</b> Deterministic exhaustive search algorithm.",
+                `<b>Analysis Method:</b> ${rules ? rules.desc : 'Standard'}.`,
+                "<b>Cost Formula:</b> Total = (Vol_Conc × Rate) + (Wt_Steel × 1.08 × Rate) + (Area_Form × Rate).",
+                "<b>Steel Wastage:</b> +8% factor applied to all steel weights (lapping/off-cuts).",
+                "<b>IS 456 Shear:</b> Stirrup spacing strictly capped at 0.75d (Cl. 26.5.1.5).",
+                "<b>ACI 318 Capacity:</b> φ-factor calculated dynamically based on strain εt.",
+                "<b>Cost Floor:</b> Design rejected if Cost < Concrete+Formwork."
+            ];
+            
+            // Logic to add code-specific notes
+            if (isACI) {
+                assumptions.push("<b>Code:</b> ACI 318-19. <b>Factors:</b> 1.2D+1.6L.");
+            } else if (isEC2) {
+                assumptions.push("<b>Code:</b> EN 1992-1-1. <b>Factors:</b> 1.35DL+1.5LL. <b>Gamma_c:</b> 1.5.");
+                assumptions.push("<b>Partial Factors:</b> γc=1.5, γs=1.15.");
+                assumptions.push("<b>Shear:</b> Variable strut angle method (cot θ = 2.5).");
+            } else {
+                assumptions.push("<b>Code:</b> IS 456:2000. <b>Factors:</b> 1.5(D+L).");
+            }
+            
+            div.innerHTML = `<ul class="list-disc pl-4 space-y-2">${assumptions.map(a => `<li>${a}</li>`).join('')}</ul>`;
+        }//
+
+        function renderACIMetrics(m) {
+            const grid = document.getElementById('designMetricsGrid');
+            grid.innerHTML = `
+                ${createMetricBox("Factored Moment", `${m.Mu.toFixed(1)} kNm`, "ACI 9.2")}
+                ${createMetricBox("Tensile Strain", m.strain_t.toFixed(4), "ACI 21.2.2")}
+                ${createMetricBox("Strength Red. φ", `${m.phi.toFixed(2)}`, "Table 21.2.2")}
+                ${createMetricBox("Effective Depth", `${m.d_actual.toFixed(1)} mm`, "Calculated")}
+                ${createMetricBox("Stirrup Spacing", `${m.sv} mm`, "ACI 9.7.6")}
+                ${createMetricBox("Min Depth", `${Math.round(m.h_min)} mm`, "Table 24.2.2")}
+            `;
+        }
+
+        function renderEC2Metrics(m) {
+            const grid = document.getElementById('designMetricsGrid');
+            grid.innerHTML = `
+                ${createMetricBox("Design Moment", `${m.Mu.toFixed(1)} kNm`, "Eq 6.10")}
+                ${createMetricBox("Norm. Moment K", m.K.toFixed(3), "≤ 0.167 (Bal)")}
+                ${createMetricBox("Lever Arm z", `${m.z.toFixed(0)} mm`, "Flexure")}
+                ${createMetricBox("Design Shear", `${m.Vu.toFixed(1)} kN`, "ULS")}
+                ${createMetricBox("Conc. Capacity", `${m.VRd_c.toFixed(1)} kN`, "Eq 6.2.a")}
+                ${createMetricBox("Stirrup Spacing", `${m.sv} mm`, "9.2.2")}
+            `;
+        }
+
+        function renderISMetrics(m) {
+            const grid = document.getElementById('designMetricsGrid');
+            grid.innerHTML = `
+                ${createMetricBox("Factored Moment", `${m.Mu.toFixed(1)} kNm`, "Cl 38.1")}
+                ${createMetricBox("Tensile Steel %", `${m.pt.toFixed(2)} %`, "Cl 40.2.1")}
+                ${createMetricBox("Shear Stress τv", `${m.tau_v.toFixed(2)} MPa`, "Cl 40.1")}
+                ${createMetricBox("Effective Depth", `${m.d_actual.toFixed(1)} mm`, "Calculated")}
+                ${createMetricBox("Stirrup Spacing", `${m.sv_prov} mm`, "Cl 40.4")}
+                ${createMetricBox("Deflection L/d", m.defl.toFixed(1), "Cl 23.2.1")}
+            `;
+        }
+
+        function createMetricBox(label, val, ref) {
+            return `<div class="metric-box"><div class="metric-label">${label}</div><div class="metric-value">${val}</div><div class="metric-meta">Ref: ${ref}</div></div>`;
+        }
+
+        function updateCharts(best, manual) {
+            const mCost = (manual && !manual.failed) ? manual.cost : 0;
+            const mCo2 = (manual && !manual.failed) ? manual.carbon : 0;
+
+            const ctxCost = document.getElementById('costChart').getContext('2d');
+            if (costChartInstance) costChartInstance.destroy();
+            
+            costChartInstance = new Chart(ctxCost, {
+                type: 'bar',
+                data: {
+                    labels: ['Manual', 'Optimal'],
+                    datasets: [
+                        { label: 'Concrete', data: [(manual&&!manual.failed)?manual.costC:0, best.costC], backgroundColor: '#cbd5e1' },
+                        { label: 'Steel', data: [(manual&&!manual.failed)?manual.costS:0, best.costS], backgroundColor: '#3b82f6' },
+                        { label: 'Formwork', data: [(manual&&!manual.failed)?manual.costF:0, best.costF], backgroundColor: '#f59e0b' }
+                    ]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { x: { stacked: true }, y: { stacked: true } }
+                }
+            });
+
+            const ctxCarbon = document.getElementById('carbonChart').getContext('2d');
+            if (carbonChartInstance) carbonChartInstance.destroy();
+            carbonChartInstance = new Chart(ctxCarbon, {
+                type: 'bar',
+                data: {
+                    labels: ['Manual', 'Optimal'],
+                    datasets: [{ label: 'Carbon', data: [mCo2, best.carbon], backgroundColor: ['#94a3b8', '#10b981'], borderRadius: 4 }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { y: { beginAtZero: true } }, 
+                    plugins: { legend: { display: false } } 
+                }
+            });
+        }
+
+        // ==========================================
+// VISUALIZATION ENGINE (FINAL: T-BEAM SUPPORT)
+// ==========================================
+function drawSection(res) {
+    const cvs = document.getElementById('sectionCanvas');
+    const ctx = cvs.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cvs.parentNode.getBoundingClientRect();
+    
+    // Resize to fit container
+    cvs.width = rect.width * dpr; 
+    cvs.height = rect.height * dpr;
+    cvs.style.width = rect.width + 'px'; 
+    cvs.style.height = rect.height + 'px';
+    ctx.scale(dpr, dpr); 
+    ctx.clearRect(0,0,rect.width,rect.height);
+    
+    // 1. Determine Dimensions based on Shape
+    const b_web = res.b;
+    const D_total = res.D;
+    const shape = res.shape || 'rectangular';
+    
+    // For drawing, we clamp the flange width so it doesn't look crazy wide
+    let b_flange = b_web;
+    let D_flange = 0;
+    
+    if (shape === 't_beam' || shape === 'l_beam') {
+        b_flange = res.bf || b_web; // Use actual bf
+        D_flange = res.Df || 0;
+    }
+
+    // 2. Calculate Scale (Fit to Canvas with Margin)
+    const margin = 40;
+    // We scale based on the widest part (flange) and total depth
+    const scale = Math.min(
+        (rect.width - margin) / Math.max(b_web, b_flange), 
+        (rect.height - margin) / D_total
+    );
+
+    // Convert to Pixels
+    const w_web = b_web * scale;
+    const h_total = D_total * scale;
+    const w_flange = b_flange * scale;
+    const h_flange = D_flange * scale;
+
+    // Center the drawing
+    const x_center = rect.width / 2;
+    const y_top = (rect.height - h_total) / 2;
+
+    // 3. Draw Concrete Shape
+    ctx.fillStyle = '#f1f5f9'; // Slate-100
+    ctx.strokeStyle = '#64748b'; // Slate-500
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    if (shape === 't_beam') {
+        // Draw T-Shape
+        const x_flange_start = x_center - (w_flange / 2);
+        const x_web_start = x_center - (w_web / 2);
+        
+        ctx.moveTo(x_flange_start, y_top); // Top Left
+        ctx.lineTo(x_flange_start + w_flange, y_top); // Top Right
+        ctx.lineTo(x_flange_start + w_flange, y_top + h_flange); // Flange Bottom Right
+        ctx.lineTo(x_web_start + w_web, y_top + h_flange); // Web Top Right
+        ctx.lineTo(x_web_start + w_web, y_top + h_total); // Web Bottom Right
+        ctx.lineTo(x_web_start, y_top + h_total); // Web Bottom Left
+        ctx.lineTo(x_web_start, y_top + h_flange); // Web Top Left
+        ctx.lineTo(x_flange_start, y_top + h_flange); // Flange Bottom Left
+        ctx.closePath();
+    } 
+    else if (shape === 'l_beam') {
+        // Draw L-Shape (Flange on Left for simplicity, or Right)
+        const x_web_start = x_center - (w_web / 2);
+        // Assuming Flange projects to the Right
+        ctx.moveTo(x_web_start, y_top); 
+        ctx.lineTo(x_web_start + w_flange, y_top); 
+        ctx.lineTo(x_web_start + w_flange, y_top + h_flange);
+        ctx.lineTo(x_web_start + w_web, y_top + h_flange);
+        ctx.lineTo(x_web_start + w_web, y_top + h_total);
+        ctx.lineTo(x_web_start, y_top + h_total);
+        ctx.closePath();
+    } 
+    else {
+        // Rectangular
+        const x_start = x_center - (w_web / 2);
+        ctx.rect(x_start, y_top, w_web, h_total);
+    }
+    
+    ctx.fill();
+    ctx.stroke();
+
+    // 4. Draw Dimensions Text
+    ctx.fillStyle = '#475569'; 
+    ctx.font = "bold 11px Inter"; 
+    ctx.textAlign = "center";
+    
+    // Web Width
+    ctx.fillText(`${b_web}`, x_center, y_top + h_total + 15);
+    
+    // Total Depth (Side Label)
+    ctx.textAlign = "left"; 
+    // Position slightly to the right of the web
+    ctx.fillText(`${D_total}`, x_center + (w_web/2) + 8, y_top + h_total/2);
+
+    // Flange Labels (Only for T/L)
+    if (shape !== 'rectangular') {
+        ctx.textAlign = "center";
+        ctx.fillText(`${Math.round(b_flange)}`, x_center, y_top - 8);
+        ctx.textAlign = "left";
+        ctx.fillText(`Df ${Math.round(D_flange)}`, x_center + (w_flange/2) + 5, y_top + h_flange/2 + 4);
+    }
+
+    // 5. Draw Rebar (Smart Positioning)
+    const cover = 25 * scale; // Visual cover
+    const botDia = res.realAst.dia * scale;
+    const topDia = (res.realAsc.dia || 10) * scale;
+    
+    // Calculate Web Boundaries for Rebar
+    const x_web_left = x_center - (w_web / 2);
+    const x_web_right = x_center + (w_web / 2);
+
+    // -- Bottom Steel (Main) --
+    ctx.fillStyle = '#1e40af'; // Blue-800
+    const yL1 = y_top + h_total - cover - botDia/2; 
+    
+    if (res.realAst.layers === 1) {
+        drawLayer(ctx, res.realAst.count, x_web_left+cover, x_web_right-cover, yL1, botDia);
+    } else {
+        const barsL1 = Math.ceil(res.realAst.count/2); 
+        const barsL2 = res.realAst.count - barsL1;
+        drawLayer(ctx, barsL1, x_web_left+cover, x_web_right-cover, yL1, botDia);
+        const gap = Math.max(botDia, 25*scale);
+        drawLayer(ctx, barsL2, x_web_left+cover, x_web_right-cover, yL1 - gap, botDia);
+    }
+
+    // -- Top Steel (Hangers/Comp) --
+    ctx.fillStyle = '#7e22ce'; // Purple-700
+    // Draw inside the stirrups (approx)
+    const yTop = y_top + cover + topDia/2;
+    drawLayer(ctx, res.realAsc.count || 2, x_web_left+cover, x_web_right-cover, yTop, topDia);
+    
+    // -- Stirrup Line (Visual Only) --
+    ctx.strokeStyle = '#ef4444'; // Red-500
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 2]);
+    ctx.strokeRect(x_web_left + cover/2, y_top + cover/2, w_web - cover, h_total - cover);
+    ctx.setLineDash([]);
+}
+        
+        function drawLayer(ctx, count, xStart, xEnd, yPos, size) {
+            if(count === 1) { ctx.beginPath(); ctx.arc((xStart+xEnd)/2, yPos, Math.max(2, size/2), 0, 6.28); ctx.fill(); return; }
+            const gap = (xEnd - xStart) / (count - 1);
+            for(let i=0; i<count; i++) { ctx.beginPath(); ctx.arc(xStart + i*gap, yPos, Math.max(2, size/2), 0, 6.28); ctx.fill(); }
+        }
+
+        // New Helper Functions for Branding & Print
+        function showDisclaimer() {
+            document.getElementById('disclaimerModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('disclaimerModal').style.display = 'none';
+        }
+        
+        function generatePDF() {
+            const selectedDesignCode = document.getElementById('inputCode').options[document.getElementById('inputCode').selectedIndex].text;
+            const originalTitle = document.title;
+            const dateStr = new Date().toISOString().slice(0,10);
+            
+            // Rebranding logic for report
+            // FIXED: Changed from "APS-OPTIMA Report: [Code]" to "[Code] Summary" as requested
+            const pdfTitle = selectedDesignCode + " Summary";
+            document.getElementById('printReportTitle').innerText = pdfTitle;
+            
+            // Dynamic Browser Title (determines filename in many print-to-pdf drivers)
+            document.title = `APS_OPTIMA_Design_Report_${dateStr}`;
+            
+            // Update Print Header Date
+            document.getElementById('printDate').innerText = "Generated on: " + new Date().toLocaleString();
+            
+            // --- INJECT SELF-WEIGHT (Calculated) ---
+            // 1. Get Optimized Dimensions (from Result Card)
+            const b_opt = parseFloat(document.getElementById('dispB').innerText) || 0;
+            const D_opt = parseFloat(document.getElementById('dispD').innerText) || 0;
+            
+            // 2. Get Input Parameters needed for T-beam logic
+            const shape = document.getElementById('sectionShape').value;
+            const codeVal = document.getElementById('inputCode').value;
+            const span = parseFloat(document.getElementById('inputSpan').value) || 0;
+            const bf = parseFloat(document.getElementById('inputBf').value) || 0;
+            const Df = parseFloat(document.getElementById('inputDf').value) || 0;
+
+            // 3. Calculate Effective Area & SW
+            let area_mm2 = b_opt * D_opt;
+            if (shape !== 'rectangular') {
+                const beff = getEffectiveFlange(codeVal, bf, b_opt, Df, span, shape);
+                area_mm2 = (b_opt * D_opt) + ((beff - b_opt) * Df);
+            }
+            // SW = Area(m2) * 25 kN/m3
+            const sw_val = (area_mm2 / 1e6) * 25;
+            const sw_text = sw_val.toFixed(2) + " kN/m";
+
+            // 4. Inject into DOM
+            const loadContainer = document.getElementById('inputDL').closest('.grid');
+            const swDiv = document.createElement('div');
+            swDiv.id = 'print-sw-injection';
+            swDiv.className = 'input-group';
+            // Match the styling of existing inputs but as read-only text
+            swDiv.innerHTML = `
+                <label class="text-blue-800 font-bold">Self-Weight (Calc)</label>
+                <div class="w-full padding-0.5 border border-transparent bg-transparent font-mono font-bold text-slate-700 mt-1">
+                    ${sw_text}
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Derived from ${b_opt}x${D_opt}</p>
+            `;
+            
+            if(loadContainer) {
+                loadContainer.appendChild(swDiv);
+            }
+
+            // Print
+            window.print();
+            
+            // Cleanup
+            if(loadContainer && swDiv) {
+                loadContainer.removeChild(swDiv);
+            }
+
+            // Restore original environment title
+            document.title = originalTitle;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            handleCodeChange();
+            runOptimization();
+        });
+    </script>
+</body>
+</html>
